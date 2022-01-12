@@ -1,6 +1,6 @@
 //! Errors that might be returned from space traders client
-use std::fmt;
 use crate::shared;
+use std::fmt;
 
 /// Any error from the space traders client is represented here
 #[derive(Debug)]
@@ -23,12 +23,16 @@ pub enum SpaceTradersClientError {
 impl fmt::Display for SpaceTradersClientError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            SpaceTradersClientError::ServiceUnavailable => write!(f, "SpaceTraders API is down for maintenance"),
+            SpaceTradersClientError::ServiceUnavailable => {
+                write!(f, "SpaceTraders API is down for maintenance")
+            }
             SpaceTradersClientError::Http(ref err) => write!(f, "Http error: {}", err),
-            SpaceTradersClientError::JsonParse(ref err) => write!(f, "Error parsing game status response: {}", err),
+            SpaceTradersClientError::JsonParse(ref err) => {
+                write!(f, "Error parsing game status response: {}", err)
+            }
             SpaceTradersClientError::ApiError(ref err) => write!(f, "Api error: {}", err),
             SpaceTradersClientError::TooManyRetries => write!(f, "Too many retries attempted"),
-            SpaceTradersClientError::Unauthorized => write!(f, "Request returned unauthorized")
+            SpaceTradersClientError::Unauthorized => write!(f, "Request returned unauthorized"),
         }
     }
 }

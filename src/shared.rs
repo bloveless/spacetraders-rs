@@ -1,9 +1,9 @@
 //! The shared module contains all common structs and enums used in the API
-use serde::{Serialize, Deserialize};
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
+use std::error::Error;
 use std::fmt;
 use std::fmt::Formatter;
-use std::error::Error;
-use chrono::{DateTime, Utc};
 
 /// The various loan types
 #[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq)]
@@ -94,7 +94,7 @@ pub enum Good {
     #[serde(rename = "UNSTABLE_COMPOUNDS")]
     UnstableCompounds,
     /// Unknown is used when a string can't be converted to a known good
-    Unknown
+    Unknown,
 }
 
 impl Good {
@@ -156,7 +156,7 @@ impl From<String> for Good {
             "Nanobots" => Good::Nanobots,
             "PrecisionInstruments" => Good::PrecisionInstruments,
             "Narcotics" => Good::Narcotics,
-            _ => Good::Unknown
+            _ => Good::Unknown,
         }
     }
 }
@@ -278,7 +278,7 @@ pub struct Loan {
     pub status: String,
     /// The type of the loan
     #[serde(rename = "type")]
-    pub loan_type: LoanType
+    pub loan_type: LoanType,
 }
 
 /// A representation of a purchase location for a ship for sale
@@ -319,6 +319,9 @@ pub struct ShipForSale {
     /// The goods that this ship is restricted to carrying
     #[serde(rename = "restrictedGoods")]
     pub restricted_goods: Option<Vec<Good>>,
+    /// The loading speed of the ship
+    #[serde(rename = "loadingSpeed")]
+    pub loading_speed: i32,
 }
 
 /// A representation of a location in a system
@@ -382,7 +385,6 @@ pub struct FlightPlanData {
     pub departure: String,
     /// The distance of the flight plan
     pub distance: i32,
-
 }
 
 /// The structures that exist at a location
@@ -502,7 +504,11 @@ pub struct ErrorMessage {
 
 impl fmt::Display for ErrorMessage {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        write!(f, "Error Code: {} Error Message: {}", self.error.code, self.error.message)
+        write!(
+            f,
+            "Error Code: {} Error Message: {}",
+            self.error.code, self.error.message
+        )
     }
 }
 
