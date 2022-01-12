@@ -1,11 +1,11 @@
 //! All responses that come back from the API are in this module
 use crate::shared;
-use serde::Deserialize;
-use chrono::{DateTime, Utc};
 use crate::shared::Loan;
+use chrono::{DateTime, Utc};
+use serde::{Deserialize, Serialize};
 
 /// My Ip address response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct MyIpAddress {
     /// My ip address
@@ -13,7 +13,7 @@ pub struct MyIpAddress {
 }
 
 /// A representation of the game status
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct GameStatus {
     /// The status of the games API servers
@@ -21,7 +21,7 @@ pub struct GameStatus {
 }
 
 /// A representation of user info
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct UserInfoData {
     /// The users name
@@ -40,7 +40,7 @@ pub struct UserInfoData {
 }
 
 /// A representation of a user info request
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct UserInfo {
     /// The user info
@@ -48,7 +48,7 @@ pub struct UserInfo {
 }
 
 /// A representation of an available loan
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct AvailableLoan {
     /// The loan type
@@ -67,7 +67,7 @@ pub struct AvailableLoan {
 }
 
 /// The representation of an available loans request
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct AvailableLoans {
     /// List of loans that are available
@@ -75,7 +75,7 @@ pub struct AvailableLoans {
 }
 
 /// A representation of a request loan response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct RequestLoan {
     /// The users new credits
@@ -85,7 +85,7 @@ pub struct RequestLoan {
 }
 
 /// The user associated with a pay loan response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct PayLoanUser {
     /// The users username
@@ -99,7 +99,7 @@ pub struct PayLoanUser {
 }
 
 /// A representation of a pay loan response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct PayLoanResponse {
     /// Users new credits after paying off the loan
@@ -109,15 +109,16 @@ pub struct PayLoanResponse {
 }
 
 /// The representation of a ships for sale request
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct ShipsForSale {
     /// The ships that are for sale
+    #[serde(rename = "shipListings")]
     pub ships: Vec<shared::ShipForSale>,
 }
 
 /// The representation of a purchase order response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct PurchaseOrder {
     /// The users new credits
@@ -129,7 +130,7 @@ pub struct PurchaseOrder {
 }
 
 /// The representation of the available locations response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct AvailableLocations {
     /// A list of locations that are available
@@ -137,7 +138,7 @@ pub struct AvailableLocations {
 }
 
 /// The representation of a flight plan response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct FlightPlan {
     /// A flight plan
@@ -146,7 +147,7 @@ pub struct FlightPlan {
 }
 
 /// The representation of a systems info response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct SystemsInfo {
     /// The list of systems info
@@ -154,7 +155,7 @@ pub struct SystemsInfo {
 }
 
 /// The representation of a user
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct User {
     /// The users id
@@ -176,7 +177,7 @@ pub struct User {
 }
 
 /// A representation of user info
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct ClaimUsernameUser {
     /// The users name
@@ -190,7 +191,7 @@ pub struct ClaimUsernameUser {
 }
 
 /// The representation of a claim username response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct ClaimUsername {
     /// The token of the claimed username
@@ -200,7 +201,7 @@ pub struct ClaimUsername {
 }
 
 /// The representation of the current user ships response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct MyShips {
     /// The list of ships attached to the current user account
@@ -208,7 +209,7 @@ pub struct MyShips {
 }
 
 /// The representation of a specific current user ship response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct MyShip {
     /// The list of ships attached to the current user account
@@ -216,7 +217,7 @@ pub struct MyShip {
 }
 
 /// The representation of a location response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct LocationInfo {
     /// The location info
@@ -227,7 +228,7 @@ pub struct LocationInfo {
 }
 
 /// The representation of your loan response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct LoanInfo {
     /// The list of loans attached to the current user account
@@ -235,7 +236,7 @@ pub struct LoanInfo {
 }
 
 /// The representation of the location marketplace return
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct LocationMarketplace {
     /// The marketplace data for the requested location
@@ -243,7 +244,7 @@ pub struct LocationMarketplace {
 }
 
 /// The representation of a purchase ship response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct PurchaseShip {
     /// The credits a user has after purchasing a ship
@@ -253,7 +254,7 @@ pub struct PurchaseShip {
 }
 
 /// The representation of a jettison cargo response
-#[derive(Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 #[cfg_attr(debug_assertions, serde(deny_unknown_fields))]
 pub struct JettisonCargo {
     /// The id of the ship that cargo was jettisoned from

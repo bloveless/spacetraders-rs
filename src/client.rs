@@ -1,17 +1,17 @@
 //! The client module wraps the interactions between the client and the server
-use crate::{responses, requests};
 use crate::shared;
+use crate::{requests, responses};
 
-use serde::{Serialize, Deserialize};
-use tokio::sync::Mutex;
-use std::sync::Arc;
-use reqwest::header::{HeaderName, HeaderValue};
-use reqwest::{Method, Url, StatusCode};
-use std::str::FromStr;
-use tokio::time::Duration;
-use std::fmt::{Debug, Formatter};
-use std::collections::HashMap;
 use crate::errors::SpaceTradersClientError;
+use reqwest::header::{HeaderName, HeaderValue};
+use reqwest::{Method, StatusCode, Url};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fmt::{Debug, Formatter};
+use std::str::FromStr;
+use std::sync::Arc;
+use tokio::sync::Mutex;
+use tokio::time::Duration;
 
 /// HttpClient is a thread-safe rate-limited space traders client
 pub type HttpClient = Arc<Mutex<SpaceTradersClient>>;
@@ -78,12 +78,15 @@ impl SpaceTradersClient {
     }
 
     async fn execute_request(
-        &self, method: &str, url: &str, body: Option<&str>, token: Option<&str>,
+        &self,
+        method: &str,
+        url: &str,
+        body: Option<&str>,
+        token: Option<&str>,
     ) -> Result<SpaceTradersClientResponse, SpaceTradersClientError> {
-        let mut request_builder = self.client.request(
-            Method::from_str(&method).unwrap(),
-            Url::parse(url).unwrap(),
-        );
+        let mut request_builder = self
+            .client
+            .request(Method::from_str(&method).unwrap(), Url::parse(url).unwrap());
 
         if let Some(token) = token {
             request_builder = request_builder.header(
@@ -93,7 +96,10 @@ impl SpaceTradersClient {
         }
 
         if let Some(body) = body {
-            request_builder = request_builder.header(HeaderName::from_lowercase(b"content-type").unwrap(), HeaderValue::from_static("application/json"));
+            request_builder = request_builder.header(
+                HeaderName::from_lowercase(b"content-type").unwrap(),
+                HeaderValue::from_static("application/json"),
+            );
             request_builder = request_builder.body(body.to_owned());
         }
 
@@ -107,17 +113,22 @@ impl SpaceTradersClient {
 
             match self.client.execute(request.try_clone().unwrap()).await {
                 Ok(response) => {
-                    let response_headers = response.headers()
-                        .iter().fold(HashMap::new(), |mut acc, (h, v)| {
-                        acc.insert(h.to_string(), v.to_str().unwrap().to_string());
-                        acc
-                    });
+                    let response_headers =
+                        response
+                            .headers()
+                            .iter()
+                            .fold(HashMap::new(), |mut acc, (h, v)| {
+                                acc.insert(h.to_string(), v.to_str().unwrap().to_string());
+                                acc
+                            });
                     let response_status = response.status();
                     let response_text = response.text().await?;
 
                     if let Some(post_request_hook) = self.post_request_hook {
                         post_request_hook(
-                            method, url, body,
+                            method,
+                            url,
+                            body,
                             Some(response_status.as_u16()),
                             Some(&response_headers),
                             Some(&response_text),
@@ -128,8 +139,10 @@ impl SpaceTradersClient {
                     // Check if the response was a throttle exception (status 429 means we have been rate limited)
                     if response_status == 429 {
                         let retry_after: f64 = response_headers
-                            .get("retry-after").unwrap_or(&"1.0".to_string())
-                            .parse().unwrap_or(1.0);
+                            .get("retry-after")
+                            .unwrap_or(&"1.0".to_string())
+                            .parse()
+                            .unwrap_or(1.0);
 
                         // If it was a throttle then wait based on the retry-after response headers
                         log::warn!("Rate limited... waiting for {} seconds before trying again. Request: \"{} {}\"", retry_after, request.method(), request.url());
@@ -140,18 +153,19 @@ impl SpaceTradersClient {
                         return Err(SpaceTradersClientError::Unauthorized);
                     } else if response_status == 500 {
                         // If there was an internal server error then try the request again in 2 seconds
-                        log::error!("Caught internal server error retrying in 2 seconds. {}", response_text);
+                        log::error!(
+                            "Caught internal server error retrying in 2 seconds. {}",
+                            response_text
+                        );
                         tokio::time::sleep(Duration::from_secs(2)).await;
 
                         continue;
                     } else {
-                        return Ok(
-                            SpaceTradersClientResponse {
-                                status_code: response_status.as_u16(),
-                                response_headers,
-                                response_text,
-                            }
-                        );
+                        return Ok(SpaceTradersClientResponse {
+                            status_code: response_status.as_u16(),
+                            response_headers,
+                            response_text,
+                        });
                     }
                 }
                 Err(e) => {
@@ -159,9 +173,13 @@ impl SpaceTradersClient {
 
                     if let Some(post_request_hook) = self.post_request_hook {
                         post_request_hook(
-                            method, url, body,
-                            None, None, None,
-                            Some(&space_traders_client_error)
+                            method,
+                            url,
+                            body,
+                            None,
+                            None,
+                            None,
+                            Some(&space_traders_client_error),
                         );
                     }
 
@@ -193,11 +211,17 @@ pub fn get_http_client_with_hook(proxy: Option<String>, hook: PostRequestHook) -
 /// # Arguments
 ///
 /// * `response_text` - A string containing the JSON response to be parsed
-fn parse_response<'a, T: Deserialize<'a>>(response_text: &'a str) -> Result<T, SpaceTradersClientError> {
+fn parse_response<'a, T: Deserialize<'a>>(
+    response_text: &'a str,
+) -> Result<T, SpaceTradersClientError> {
     match serde_json::from_str::<T>(&response_text) {
         Ok(o) => Ok(o),
         Err(e) => {
-            log::error!("Error processing type {:?}: {}", std::any::type_name::<T>(), e);
+            log::error!(
+                "Error processing type {:?}: {}",
+                std::any::type_name::<T>(),
+                e
+            );
             log::error!("Error response: {}", &response_text);
 
             match serde_json::from_str::<shared::ErrorMessage>(&response_text) {
@@ -213,28 +237,30 @@ fn parse_response<'a, T: Deserialize<'a>>(response_text: &'a str) -> Result<T, S
 /// # Arguments
 ///
 /// * `username` - A string containing the username to get a token for
-pub async fn claim_username(http_client: HttpClient, username: String) -> Result<responses::ClaimUsername, SpaceTradersClientError> {
+pub async fn claim_username(
+    http_client: HttpClient,
+    username: String,
+) -> Result<responses::ClaimUsername, SpaceTradersClientError> {
     let http_client = http_client.lock().await;
-    let response = http_client.execute_request(
-        "POST",
-        &format!("https://api.spacetraders.io/users/{}/token", username),
-        Some("{\"message\":\"this body doesn't actually matter\"}"),
-        None,
-    )
+    let response = http_client
+        .execute_request(
+            "POST",
+            &format!("https://api.spacetraders.io/users/{}/token", username),
+            Some("{\"message\":\"this body doesn't actually matter\"}"),
+            None,
+        )
         .await?;
 
     parse_response::<responses::ClaimUsername>(&response.response_text)
 }
 
 /// Get the status of the game API.
-pub async fn get_game_status(http_client: HttpClient) -> Result<responses::GameStatus, SpaceTradersClientError> {
+pub async fn get_game_status(
+    http_client: HttpClient,
+) -> Result<responses::GameStatus, SpaceTradersClientError> {
     let http_client = http_client.lock().await;
-    let response = http_client.execute_request(
-        "GET",
-        "https://api.spacetraders.io/game/status",
-        None,
-        None,
-    )
+    let response = http_client
+        .execute_request("GET", "https://api.spacetraders.io/game/status", None, None)
         .await?;
 
     if response.status_code == StatusCode::SERVICE_UNAVAILABLE.as_u16() {
@@ -245,14 +271,12 @@ pub async fn get_game_status(http_client: HttpClient) -> Result<responses::GameS
 }
 
 /// Get the users current ip address
-pub async fn get_my_ip_address(http_client: HttpClient) -> Result<responses::MyIpAddress, SpaceTradersClientError> {
+pub async fn get_my_ip_address(
+    http_client: HttpClient,
+) -> Result<responses::MyIpAddress, SpaceTradersClientError> {
     let http_client = http_client.lock().await;
-    let response = http_client.execute_request(
-        "GET",
-        "https://api.ipify.org?format=json",
-        None,
-        None,
-    )
+    let response = http_client
+        .execute_request("GET", "https://api.ipify.org?format=json", None, None)
         .await?;
 
     parse_response::<responses::MyIpAddress>(&response.response_text)
@@ -290,12 +314,13 @@ impl Client {
     /// Get all information about the current user
     pub async fn get_my_info(&self) -> Result<responses::UserInfo, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/my/account",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                "https://api.spacetraders.io/my/account",
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::UserInfo>(&response.response_text)
@@ -310,14 +335,21 @@ impl Client {
     /// # Arguments
     ///
     /// * `flight_plan_id` - A string containing the flight plan id
-    pub async fn get_flight_plan(&self, flight_plan_id: String) -> Result<responses::FlightPlan, SpaceTradersClientError> {
+    pub async fn get_flight_plan(
+        &self,
+        flight_plan_id: String,
+    ) -> Result<responses::FlightPlan, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            &format!("https://api.spacetraders.io/my/flight-plans/{}", flight_plan_id),
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!(
+                    "https://api.spacetraders.io/my/flight-plans/{}",
+                    flight_plan_id
+                ),
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::FlightPlan>(&response.response_text)
@@ -329,19 +361,24 @@ impl Client {
     ///
     /// * `ship_id` - A string containing the ship_id to create the flight plan for
     /// * `destination` - A string containing the location to send the ship to
-    pub async fn create_flight_plan(&self, ship_id: String, destination: String) -> Result<responses::FlightPlan, SpaceTradersClientError> {
+    pub async fn create_flight_plan(
+        &self,
+        ship_id: String,
+        destination: String,
+    ) -> Result<responses::FlightPlan, SpaceTradersClientError> {
         let flight_plan_request = requests::FlightPlanRequest {
             ship_id: ship_id.clone(),
             destination: destination.clone(),
         };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/flight-plans",
-            Some(&serde_json::to_string(&flight_plan_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/flight-plans",
+                Some(&serde_json::to_string(&flight_plan_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::FlightPlan>(&response.response_text)
@@ -360,12 +397,13 @@ impl Client {
     /// Get any loans taken out by the current user
     pub async fn get_my_loans(&self) -> Result<responses::LoanInfo, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/my/loans",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                "https://api.spacetraders.io/my/loans",
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::LoanInfo>(&response.response_text)
@@ -376,14 +414,18 @@ impl Client {
     /// # Arguments
     ///
     /// * `loan_id` - A string containing the loan_id of the loan to pay off
-    pub async fn pay_off_loan(&self, loan_id: &str) -> Result<responses::PayLoanResponse, SpaceTradersClientError> {
+    pub async fn pay_off_loan(
+        &self,
+        loan_id: &str,
+    ) -> Result<responses::PayLoanResponse, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "PUT",
-            &format!("https://api.spacetraders.io/my/loans/{}", loan_id),
-            Some("{\"message\":\"this body doesn't actually matter\"}"),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "PUT",
+                &format!("https://api.spacetraders.io/my/loans/{}", loan_id),
+                Some("{\"message\":\"this body doesn't actually matter\"}"),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::PayLoanResponse>(&response.response_text)
@@ -394,18 +436,20 @@ impl Client {
     /// # Arguments
     ///
     /// * `loan_type` - A LoanType with the type of loan being requested for the current user
-    pub async fn request_new_loan(&self, loan_type: shared::LoanType) -> Result<responses::RequestLoan, SpaceTradersClientError> {
-        let request_new_loan_request = requests::RequestNewLoanRequest {
-            loan_type
-        };
+    pub async fn request_new_loan(
+        &self,
+        loan_type: shared::LoanType,
+    ) -> Result<responses::RequestLoan, SpaceTradersClientError> {
+        let request_new_loan_request = requests::RequestNewLoanRequest { loan_type };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/loans",
-            Some(&serde_json::to_string(&request_new_loan_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/loans",
+                Some(&serde_json::to_string(&request_new_loan_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::RequestLoan>(&response.response_text)
@@ -420,14 +464,18 @@ impl Client {
     /// # Arguments
     ///
     /// * `location_symbol` - A string containing the location name to get info about
-    pub async fn get_location_info(&self, location_symbol: String) -> Result<responses::LocationInfo, SpaceTradersClientError> {
+    pub async fn get_location_info(
+        &self,
+        location_symbol: String,
+    ) -> Result<responses::LocationInfo, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            &format!("https://api.spacetraders.io/locations/{}", location_symbol),
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!("https://api.spacetraders.io/locations/{}", location_symbol),
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::LocationInfo>(&response.response_text)
@@ -462,14 +510,21 @@ impl Client {
     /// # Arguments
     ///
     /// * `location_symbol` - A string containing the name of the location to get marketplace data for
-    pub async fn get_location_marketplace(&self, location_symbol: &str) -> Result<responses::LocationMarketplace, SpaceTradersClientError> {
+    pub async fn get_location_marketplace(
+        &self,
+        location_symbol: &str,
+    ) -> Result<responses::LocationMarketplace, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            &format!("https://api.spacetraders.io/locations/{}/marketplace", location_symbol),
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!(
+                    "https://api.spacetraders.io/locations/{}/marketplace",
+                    location_symbol
+                ),
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::LocationMarketplace>(&response.response_text)
@@ -488,7 +543,12 @@ impl Client {
     /// * `ship` - A Ship struct that you'd like to transfer the goods into
     /// * `good` - A Good enum containing the type of good you'd like to transfer
     /// * `quantity` - An i32 containing the quantity of good you'd like transferred
-    pub async fn create_purchase_order(&self, ship_id: String, good: shared::Good, quantity: i32) -> Result<responses::PurchaseOrder, SpaceTradersClientError> {
+    pub async fn create_purchase_order(
+        &self,
+        ship_id: String,
+        good: shared::Good,
+        quantity: i32,
+    ) -> Result<responses::PurchaseOrder, SpaceTradersClientError> {
         let purchase_order_request = requests::PurchaseOrderRequest {
             ship_id: ship_id.clone(),
             good,
@@ -496,12 +556,13 @@ impl Client {
         };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/purchase-orders",
-            Some(&serde_json::to_string(&purchase_order_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/purchase-orders",
+                Some(&serde_json::to_string(&purchase_order_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::PurchaseOrder>(&response.response_text)
@@ -519,7 +580,12 @@ impl Client {
     /// * `ship` - A Ship struct that you'd like to transfer the goods from
     /// * `good` - A Good enum containing the type of good you'd like to transfer
     /// * `quantity` - An i32 containing the quantity of good you'd like transferred
-    pub async fn create_sell_order(&self, ship_id: String, good: shared::Good, quantity: i32) -> Result<responses::PurchaseOrder, SpaceTradersClientError> {
+    pub async fn create_sell_order(
+        &self,
+        ship_id: String,
+        good: shared::Good,
+        quantity: i32,
+    ) -> Result<responses::PurchaseOrder, SpaceTradersClientError> {
         let sell_order_request = requests::SellOrderRequest {
             ship_id: ship_id.clone(),
             good,
@@ -527,12 +593,13 @@ impl Client {
         };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/sell-orders",
-            Some(&serde_json::to_string(&sell_order_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/sell-orders",
+                Some(&serde_json::to_string(&sell_order_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::PurchaseOrder>(&response.response_text)
@@ -548,19 +615,24 @@ impl Client {
     ///
     /// * `location_symbol` - A string containing the location you'd like to purchase the ship from
     /// * `ship_type` - A string containing the type of ship you'd like to purchase
-    pub async fn purchase_ship(&self, location_symbol: String, ship_type: String) -> Result<responses::PurchaseShip, SpaceTradersClientError> {
+    pub async fn purchase_ship(
+        &self,
+        location_symbol: String,
+        ship_type: String,
+    ) -> Result<responses::PurchaseShip, SpaceTradersClientError> {
         let purchase_ship_request = requests::PurchaseShipRequest {
             location: location_symbol.clone(),
             ship_type: ship_type.clone(),
         };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/ships",
-            Some(&serde_json::to_string(&purchase_ship_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/ships",
+                Some(&serde_json::to_string(&purchase_ship_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::PurchaseShip>(&response.response_text)
@@ -571,14 +643,18 @@ impl Client {
     /// # Arguments
     ///
     /// * `ship_id` - A string id of the ship you'd like info about
-    pub async fn get_my_ship(&self, ship_id: &str) -> Result<responses::MyShip, SpaceTradersClientError> {
+    pub async fn get_my_ship(
+        &self,
+        ship_id: &str,
+    ) -> Result<responses::MyShip, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            &format!("https://api.spacetraders.io/my/ships/{}", ship_id),
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!("https://api.spacetraders.io/my/ships/{}", ship_id),
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::MyShip>(&response.response_text)
@@ -587,31 +663,35 @@ impl Client {
     /// Get all your ships
     pub async fn get_my_ships(&self) -> Result<responses::MyShips, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/my/ships",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                "https://api.spacetraders.io/my/ships",
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::MyShips>(&response.response_text)
     }
 
     /// Jettison cargo from a ship
-    pub async fn jettison_cargo(&self, ship_id: &str, good: shared::Good, quantity: i32) -> Result<responses::JettisonCargo, SpaceTradersClientError> {
-        let jettison_cargo_request = requests::JettisonCargo {
-            good,
-            quantity,
-        };
+    pub async fn jettison_cargo(
+        &self,
+        ship_id: &str,
+        good: shared::Good,
+        quantity: i32,
+    ) -> Result<responses::JettisonCargo, SpaceTradersClientError> {
+        let jettison_cargo_request = requests::JettisonCargo { good, quantity };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            &format!("https://api.spacetraders.io/my/ships/{}/jettison", ship_id),
-            Some(&serde_json::to_string(&jettison_cargo_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                &format!("https://api.spacetraders.io/my/ships/{}/jettison", ship_id),
+                Some(&serde_json::to_string(&jettison_cargo_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::JettisonCargo>(&response.response_text)
@@ -637,18 +717,23 @@ impl Client {
     ///// SYSTEMS
     //////////////////////////////////////////////
 
-    // TODO: This endpoint should probably be "Get a list of all available ships in the system."
-    /// Get all ships that are available for sale
-    pub async fn get_ships_for_sale(&self) -> Result<responses::ShipsForSale, SpaceTradersClientError> {
+    /// Get a list of all available ships in the system
+    pub async fn get_ships_for_sale(
+        &self,
+        system_symbol: &str,
+    ) -> Result<responses::ShipsForSale, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/game/ships",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!(
+                    "https://api.spacetraders.io/systems/{}/ship-listings",
+                    system_symbol
+                ),
+                None,
+                Some(&self.token),
+            )
             .await?;
-
         parse_response::<responses::ShipsForSale>(&response.response_text)
     }
 
@@ -659,14 +744,17 @@ impl Client {
 
     // TODO: I'm not sure which endpoint this is supposed to be converted to
     /// Get information about all systems
-    pub async fn get_systems_info(&self) -> Result<responses::SystemsInfo, SpaceTradersClientError> {
+    pub async fn get_systems_info(
+        &self,
+    ) -> Result<responses::SystemsInfo, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/game/systems",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                "https://api.spacetraders.io/game/systems",
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::SystemsInfo>(&response.response_text)
@@ -679,19 +767,21 @@ impl Client {
     // TODO: Get available goods
 
     /// Get all available loans
-    pub async fn get_available_loans(&self) -> Result<responses::AvailableLoans, SpaceTradersClientError> {
+    pub async fn get_available_loans(
+        &self,
+    ) -> Result<responses::AvailableLoans, SpaceTradersClientError> {
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "GET",
-            "https://api.spacetraders.io/types/loans",
-            None,
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "GET",
+                "https://api.spacetraders.io/types/loans",
+                None,
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::AvailableLoans>(&response.response_text)
     }
-
 
     // TODO: Get available structures
     // TODO: Get info on available ships
@@ -701,18 +791,20 @@ impl Client {
     //////////////////////////////////////////////
 
     /// Attempt a warp jump
-    pub async fn attempt_warp_jump(&self, ship_id: String) -> Result<responses::FlightPlan, SpaceTradersClientError> {
-        let warp_jump_request = requests::WarpJump {
-            ship_id
-        };
+    pub async fn attempt_warp_jump(
+        &self,
+        ship_id: String,
+    ) -> Result<responses::FlightPlan, SpaceTradersClientError> {
+        let warp_jump_request = requests::WarpJump { ship_id };
 
         let http_client = self.http_client.lock().await;
-        let response = http_client.execute_request(
-            "POST",
-            "https://api.spacetraders.io/my/warp-jumps",
-            Some(&serde_json::to_string(&warp_jump_request).unwrap()),
-            Some(&self.token),
-        )
+        let response = http_client
+            .execute_request(
+                "POST",
+                "https://api.spacetraders.io/my/warp-jumps",
+                Some(&serde_json::to_string(&warp_jump_request).unwrap()),
+                Some(&self.token),
+            )
             .await?;
 
         parse_response::<responses::FlightPlan>(&response.response_text)

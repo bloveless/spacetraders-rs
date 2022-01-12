@@ -1,6 +1,6 @@
 //! All requests being sent to the api are in this module
-use serde::Serialize;
 use crate::shared;
+use serde::Serialize;
 
 /// The representation of a purchase order request
 #[derive(Serialize, Debug)]

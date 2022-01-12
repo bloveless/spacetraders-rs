@@ -7,7 +7,7 @@
 #![warn(missing_docs)]
 
 pub mod client;
-pub mod shared;
-pub mod responses;
-pub mod requests;
 pub mod errors;
+pub mod requests;
+pub mod responses;
+pub mod shared;
