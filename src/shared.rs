@@ -345,6 +345,13 @@ pub struct Location {
     pub x: i32,
     /// Y coordinate of the location
     pub y: i32,
+    /// Whether or not the system allows construction
+    #[serde(rename = "allowsConstruction")]
+    pub allows_construction: bool,
+    /// The structures within a system location
+    pub structures: Option<Vec<Structures>>,
+    /// Any messages relating to this system location
+    pub messages: Option<Vec<String>>,
 }
 
 /// A representation of an error message

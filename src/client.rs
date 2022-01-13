@@ -481,25 +481,30 @@ impl Client {
         parse_response::<responses::LocationInfo>(&response.response_text)
     }
 
-    // TODO:
-    // /// Get all the locations in a particular system
-    // ///
-    // /// # Arguments
-    // ///
-    // /// * `system_symbol` - A string containing the system name to get the locations from
-    // /// * `location_type` - An optional LocationType if you want to filter the locations by type
-    // pub async fn get_locations_in_system(&self, system_symbol: String) -> Result<responses::AvailableLocations, SpaceTradersClientError> {
-    //     let http_client = self.http_client.lock().await;
-    //     let response = http_client.execute_request(
-    //         "GET",
-    //         &format!("https://api.spacetraders.io/game/systems/{}/locations", system_symbol),
-    //         None,
-    //         Some(&self.token),
-    //     )
-    //         .await?;
-    //
-    //     parse_response::<responses::AvailableLocations>(&response.response_text)
-    // }
+    /// Get all the locations in a particular system
+    ///
+    /// # Arguments
+    ///
+    /// * `system_symbol` - A string containing the system name to get the locations from
+    pub async fn get_locations_in_system(
+        &self,
+        system_symbol: String,
+    ) -> Result<responses::AvailableLocations, SpaceTradersClientError> {
+        let http_client = self.http_client.lock().await;
+        let response = http_client
+            .execute_request(
+                "GET",
+                &format!(
+                    "https://api.spacetraders.io/game/systems/{}/locations",
+                    system_symbol
+                ),
+                None,
+                Some(&self.token),
+            )
+            .await?;
+
+        parse_response::<responses::AvailableLocations>(&response.response_text)
+    }
 
     /// Get the marketplace data about a location.
     ///
