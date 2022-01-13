@@ -233,6 +233,12 @@ pub struct Ship {
     #[serde(rename = "flightPlanId")]
     /// The ships current flight plan
     pub flight_plan_id: Option<String>,
+    #[serde(rename = "loadingSpeed")]
+    /// The loading speed of the ship
+    pub loading_speed: i32,
+    /// The goods that this ship is restricted to carrying
+    #[serde(rename = "restrictedGoods")]
+    pub restricted_goods: Option<Vec<Good>>,
 }
 
 /// A representation of cargo within a ship
