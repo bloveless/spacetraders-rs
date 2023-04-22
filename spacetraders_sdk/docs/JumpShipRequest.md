@@ -1,6 +1,7 @@
 # JumpShipRequest
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **system_symbol** | **String** | The system symbol to jump to. | 

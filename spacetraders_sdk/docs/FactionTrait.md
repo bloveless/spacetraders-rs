@@ -1,6 +1,7 @@
 # FactionTrait
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **symbol** | **String** | The unique identifier of the trait. | 

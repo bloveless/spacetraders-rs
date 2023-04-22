@@ -1,6 +1,7 @@
 # ShipRefineRequest
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **produce** | **String** |  | 

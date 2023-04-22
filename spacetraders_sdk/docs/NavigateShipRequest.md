@@ -1,6 +1,7 @@
 # NavigateShipRequest
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **waypoint_symbol** | **String** | The target destination. | 

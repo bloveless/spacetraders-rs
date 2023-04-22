@@ -1,10 +1,11 @@
 # CreateShipShipScan201ResponseData
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**cooldown** | [***models::Cooldown**](Cooldown.md) |  | 
-**ships** | [**Vec<models::ScannedShip>**](ScannedShip.md) |  | 
+**cooldown** | [**crate::models::Cooldown**](Cooldown.md) |  | 
+**ships** | [**Vec<crate::models::ScannedShip>**](ScannedShip.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

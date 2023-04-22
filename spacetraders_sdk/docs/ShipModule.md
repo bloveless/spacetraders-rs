@@ -1,14 +1,15 @@
 # ShipModule
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **symbol** | **String** |  | 
-**capacity** | **u32** |  | [optional] [default to None]
-**range** | **u32** |  | [optional] [default to None]
+**capacity** | Option<**i32**> |  | [optional]
+**range** | Option<**i32**> |  | [optional]
 **name** | **String** |  | 
-**description** | **String** |  | [optional] [default to None]
-**requirements** | [***models::ShipRequirements**](ShipRequirements.md) |  | 
+**description** | Option<**String**> |  | [optional]
+**requirements** | [**crate::models::ShipRequirements**](ShipRequirements.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -1,6 +1,7 @@
 # TradeSymbol
 
 ## Properties
+
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 
