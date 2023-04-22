@@ -1,11 +1,10 @@
 # ShipNavRouteWaypoint
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **symbol** | **String** |  | 
-**r#type** | [**crate::models::WaypointType**](WaypointType.md) |  | 
+**r#type** | [***models::WaypointType**](WaypointType.md) |  | 
 **system_symbol** | **String** |  | 
 **x** | **i32** |  | 
 **y** | **i32** |  | 

@@ -1,7 +1,6 @@
 # ShipRole
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 

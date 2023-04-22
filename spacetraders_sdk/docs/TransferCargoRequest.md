@@ -1,7 +1,6 @@
 # TransferCargoRequest
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **trade_symbol** | **String** |  | 

@@ -1,7 +1,6 @@
 # ContractDeliverGood
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **trade_symbol** | **String** | The symbol of the trade good to deliver. | 

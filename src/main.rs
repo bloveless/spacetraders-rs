@@ -1,12 +1,3 @@
-use spacetraders_sdk::apis::default_api::register;
-use spacetraders_sdk::apis::agents_api::get_my_agent;
-use spacetraders_sdk::apis::configuration::{ApiKey, Configuration};
-use spacetraders_sdk::apis::contracts_api::{accept_contract, AcceptContractParams, get_contracts};
-use spacetraders_sdk::apis::factions_api::get_faction;
-use spacetraders_sdk::apis::fleet_api::get_my_ships;
-use spacetraders_sdk::apis::systems_api::{get_system_waypoints, get_waypoint};
-use spacetraders_sdk::models::RegisterRequest;
-
 // const blove_account_id = "clgq3deon3qs5s60d7y09d7gg";
 const ACCOUNT_SYMBOL: &str = "BLOVE";
 const FACTION: &str = "COSMIC";
@@ -15,8 +6,8 @@ const BLOVE_TOKEN: &str = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVy
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let mut conf = Configuration::new();
-    conf.bearer_access_token = Some(BLOVE_TOKEN.to_string());
+    // let mut conf = Configuration::new();
+    // conf.bearer_access_token = Some(BLOVE_TOKEN.to_string());
 
     // let register_response = register(
     //     &conf,
@@ -40,8 +31,8 @@ async fn main() -> anyhow::Result<()> {
     // let starting_waypoint = get_waypoint(&conf, "X1-DF55", "X1-DF55-20250Z").await?;
     // println!("Starting waypoint: {:#?}", starting_waypoint);
 
-    let accepted_contract = accept_contract(&conf, AcceptContractParams { contract_id: CONTRACT_ID.to_owned() }).await?;
-    println!("Accepted Contract: {:#?}", accepted_contract);
+    // let accepted_contract = accept_contract(&conf, AcceptContractParams { contract_id: CONTRACT_ID.to_owned() }).await?;
+    // println!("Accepted Contract: {:#?}", accepted_contract);
 
     Ok(())
 }

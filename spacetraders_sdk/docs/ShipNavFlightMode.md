@@ -1,7 +1,6 @@
 # ShipNavFlightMode
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 

@@ -1,7 +1,6 @@
 # RegisterRequest
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **faction** | **String** | The faction you choose determines your headquarters. | 

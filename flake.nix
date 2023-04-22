@@ -29,6 +29,8 @@
             exa
             fd
             rust
+            nodejs
+            openapi-generator-cli
           ] ++ (
             lib.optionals stdenv.isDarwin [
               frameworks.Security

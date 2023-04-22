@@ -1,13 +1,12 @@
 # ConnectedSystem
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **symbol** | **String** |  | 
 **sector_symbol** | **String** |  | 
-**r#type** | [**crate::models::SystemType**](SystemType.md) |  | 
-**faction_symbol** | Option<**String**> | The symbol of the faction that owns the connected jump gate in the system. | [optional]
+**r#type** | [***models::SystemType**](SystemType.md) |  | 
+**faction_symbol** | **String** | The symbol of the faction that owns the connected jump gate in the system. | [optional] [default to None]
 **x** | **i32** |  | 
 **y** | **i32** |  | 
 **distance** | **i32** |  | 

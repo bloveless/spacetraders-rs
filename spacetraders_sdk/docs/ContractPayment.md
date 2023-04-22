@@ -1,7 +1,6 @@
 # ContractPayment
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **on_accepted** | **i32** | The amount of credits received up front for accepting the contract. | 

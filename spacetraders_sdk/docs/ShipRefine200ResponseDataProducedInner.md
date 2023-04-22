@@ -1,11 +1,10 @@
 # ShipRefine200ResponseDataProducedInner
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**trade_symbol** | Option<**String**> |  | [optional]
-**units** | Option<**i32**> |  | [optional]
+**trade_symbol** | **String** |  | [optional] [default to None]
+**units** | **i32** |  | [optional] [default to None]
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

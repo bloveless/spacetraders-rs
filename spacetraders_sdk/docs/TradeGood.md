@@ -1,10 +1,9 @@
 # TradeGood
 
 ## Properties
-
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**symbol** | [**crate::models::TradeSymbol**](TradeSymbol.md) |  | 
+**symbol** | [***models::TradeSymbol**](TradeSymbol.md) |  | 
 **name** | **String** |  | 
 **description** | **String** |  | 
 
