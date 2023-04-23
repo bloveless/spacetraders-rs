@@ -1,9 +1,12 @@
 use spacetraders_sdk::apis::agents_api::get_my_agent;
 use spacetraders_sdk::apis::configuration::Configuration;
-use spacetraders_sdk::apis::contracts_api::{accept_contract, AcceptContractParams, get_contracts, GetContractsParams};
+use spacetraders_sdk::apis::contracts_api::{
+    accept_contract, get_contracts, AcceptContractError, AcceptContractParams, GetContractsParams,
+};
 use spacetraders_sdk::apis::factions_api::{get_faction, GetFactionParams};
 use spacetraders_sdk::apis::fleet_api::{get_my_ships, GetMyShipsParams};
 use spacetraders_sdk::apis::systems_api::{get_waypoint, GetWaypointParams};
+use spacetraders_sdk::apis::ResponseContent;
 
 // const blove_account_id = "clgq3deon3qs5s60d7y09d7gg";
 const BASE_URL: &str = "https://api.spacetraders.io";
@@ -28,20 +31,101 @@ async fn main() -> anyhow::Result<()> {
     let my_agent = get_my_agent(&conf).await?;
     println!("My agent: {:#?}", my_agent);
 
-    let my_contracts = get_contracts(&conf, GetContractsParams { page: None, limit: None }).await?;
+    let my_contracts = get_contracts(
+        &conf,
+        GetContractsParams {
+            page: None,
+            limit: None,
+        },
+    )
+    .await?;
     println!("My contracts {:#?}", my_contracts);
 
-    let my_faction = get_faction(&conf, GetFactionParams { faction_symbol: FACTION.to_string() }).await?;
+    let my_faction = get_faction(
+        &conf,
+        GetFactionParams {
+            faction_symbol: FACTION.to_string(),
+        },
+    )
+    .await?;
     println!("My faction {:#?}", my_faction);
 
-    let my_ships = get_my_ships(&conf, GetMyShipsParams { page: None, limit: None }).await?;
+    let my_ships = get_my_ships(
+        &conf,
+        GetMyShipsParams {
+            page: None,
+            limit: None,
+        },
+    )
+    .await?;
     println!("My ships {:#?}", my_ships);
 
-    let starting_waypoint = get_waypoint(&conf, GetWaypointParams { system_symbol: "X1-DF55".to_string(), waypoint_symbol: "X1-DF55-20250Z".to_string() }).await?;
+    let starting_waypoint = get_waypoint(
+        &conf,
+        GetWaypointParams {
+            system_symbol: "X1-DF55".to_string(),
+            waypoint_symbol: "X1-DF55-20250Z".to_string(),
+        },
+    )
+    .await?;
     println!("Starting waypoint: {:#?}", starting_waypoint);
 
-    let accepted_contract = accept_contract(&conf, AcceptContractParams { contract_id: CONTRACT_ID.to_owned() }).await?;
-    println!("Accepted Contract: {:#?}", accepted_contract);
+    let accepted_contract = accept_contract(
+        &conf,
+        AcceptContractParams {
+            contract_id: CONTRACT_ID.to_owned(),
+        },
+    )
+    .await;
+
+    match accepted_contract {
+        Ok(ac) => println!("Accepted Contract: {:#?}", ac),
+        Err(e) => match e {
+            spacetraders_sdk::apis::Error::ResponseError::<AcceptContractError>(ace) => {
+                let AcceptContractError::UnknownValue(v) = ace.entity.unwrap();
+                println!(
+                    "error status: {}, error entity: {}",
+                    ace.status,
+                    v.get("error").unwrap().get("message").unwrap()
+                );
+            }
+            _ => println!("unknown error"),
+        },
+    }
+
+    fn get_error_message<T>(e: spacetraders_sdk::apis::Error<T>) -> String {
+        match e {
+            spacetraders_sdk::apis::Error::ResponseError::<T>(ev) => {
+                let <T>::UnknownValue(v) = ev.entity.unwrap();
+                format!(
+                    "error status: {}, error entity: {}",
+                    v.status,
+                    v.get("error").unwrap().get("message").unwrap()
+                )
+            }
+            _ => format!("unknown error"),
+        }
+    }
+
+    match accepted_contract {
+        Ok(ac) => println!("Accepted Contract: {:#?}", ac),
+        Err(e) => println!("Accept contract failed: {}", get_error_message<AcceptContractError>()),
+    }
+
+    // match accepted_contract {
+    //     Ok(ac) => println!("Accepted Contract: {:#?}", ac),
+    //     Err(e) => match e {
+    //         spacetraders_sdk::apis::Error::ResponseError::<AcceptContractError>(ace) => {
+    //             let AcceptContractError::UnknownValue(v) = ace.entity.unwrap();
+    //             println!(
+    //                 "error status: {}, error entity: {}",
+    //                 ace.status,
+    //                 v.get("error").unwrap().get("message").unwrap()
+    //             );
+    //         }
+    //         _ => println!("unknown error"),
+    //     },
+    // }
 
     Ok(())
 }
