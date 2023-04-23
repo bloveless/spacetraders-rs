@@ -42,7 +42,7 @@ pub async fn register(configuration: &configuration::Configuration, params: Regi
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = register_request {
+    if let Some(body) = register_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);

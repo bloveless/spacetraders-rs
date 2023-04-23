@@ -427,7 +427,7 @@ pub async fn extract_resources(configuration: &configuration::Configuration, par
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = extract_resources_request {
+    if let Some(body) = extract_resources_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -660,7 +660,7 @@ pub async fn jettison(configuration: &configuration::Configuration, params: Jett
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = jettison_request {
+    if let Some(body) = jettison_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -701,7 +701,7 @@ pub async fn jump_ship(configuration: &configuration::Configuration, params: Jum
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = jump_ship_request {
+    if let Some(body) = jump_ship_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -742,7 +742,7 @@ pub async fn navigate_ship(configuration: &configuration::Configuration, params:
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = navigate_ship_request {
+    if let Some(body) = navigate_ship_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -820,7 +820,7 @@ pub async fn patch_ship_nav(configuration: &configuration::Configuration, params
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = patch_ship_nav_request {
+    if let Some(body) = patch_ship_nav_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -861,7 +861,7 @@ pub async fn purchase_cargo(configuration: &configuration::Configuration, params
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = purchase_cargo_request {
+    if let Some(body) = purchase_cargo_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -901,7 +901,7 @@ pub async fn purchase_ship(configuration: &configuration::Configuration, params:
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = purchase_ship_request {
+    if let Some(body) = purchase_ship_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -979,7 +979,7 @@ pub async fn sell_cargo(configuration: &configuration::Configuration, params: Se
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = sell_cargo_request {
+    if let Some(body) = sell_cargo_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -1020,7 +1020,7 @@ pub async fn ship_refine(configuration: &configuration::Configuration, params: S
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = ship_refine_request {
+    if let Some(body) = ship_refine_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -1061,7 +1061,7 @@ pub async fn transfer_cargo(configuration: &configuration::Configuration, params
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = transfer_cargo_request {
+    if let Some(body) = transfer_cargo_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);
@@ -1102,7 +1102,7 @@ pub async fn warp_ship(configuration: &configuration::Configuration, params: War
     if let Some(ref local_var_token) = local_var_configuration.bearer_access_token {
         local_var_req_builder = local_var_req_builder.bearer_auth(local_var_token.to_owned());
     };
-    if Some(body) = navigate_ship_request {
+    if let Some(body) = navigate_ship_request {
         local_var_req_builder = local_var_req_builder.json(&body);
     } else {
         local_var_req_builder = local_var_req_builder.header(reqwest::header::CONTENT_LENGTH, 0);

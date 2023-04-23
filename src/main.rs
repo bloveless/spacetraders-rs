@@ -100,11 +100,11 @@ async fn main() -> anyhow::Result<()> {
     println!("My Contract: {:#?}", my_contract);
 
     // Find a shipyard
-    // let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
-    //     system_symbol: "X1-DF55".to_string(),
-    //     ..Default::default()
-    // }).await?;
-    // println!("Waypoints: {:#?}", waypoints);
+    let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
+        system_symbol: "X1-DF55".to_string(),
+        ..Default::default()
+    }).await?;
+    println!("Waypoints: {:#?}", waypoints);
 
     // let shipyard = waypoints.data.into_iter().find(|w| {
     //     w.traits.clone().into_iter().find(|t| t.symbol == Symbol::Shipyard).is_some()
@@ -167,14 +167,14 @@ async fn main() -> anyhow::Result<()> {
     // }).await?;
     // println!("Orbit results: {:?}", orbit_results);
 
-    let extract_results = extract_resources(&conf, ExtractResourcesParams {
-        ship_symbol: mining_ship_symbol.to_string(),
-        extract_resources_request: None,
-    }).await;
-    match extract_results {
-        Ok(er) => println!("Extract results: {:?}", er),
-        Err(e) => println!("Extract error: {:?}", get_error_message(e)),
-    }
+    // let extract_results = extract_resources(&conf, ExtractResourcesParams {
+    //     ship_symbol: mining_ship_symbol.to_string(),
+    //     extract_resources_request: None,
+    // }).await;
+    // match extract_results {
+    //     Ok(er) => println!("Extract results: {:?}", er),
+    //     Err(e) => println!("Extract error: {:?}", get_error_message(e)),
+    // }
 
     Ok(())
 }
