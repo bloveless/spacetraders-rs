@@ -1,22 +1,35 @@
 use std::error;
 use std::fmt;
 
-#[derive(Debug, Clone)]
-pub struct ResponseContent<T> {
-    pub status: reqwest::StatusCode,
-    pub content: String,
-    pub entity: Option<T>,
-}
-
 #[derive(Debug)]
-pub enum Error<T> {
+pub enum Error {
     Reqwest(reqwest::Error),
     Serde(serde_json::Error),
     Io(std::io::Error),
-    ResponseError(ResponseContent<T>),
+    ResponseError(ResponseContent),
 }
 
-impl <T> fmt::Display for Error<T> {
+
+#[derive(Debug, Clone)]
+pub struct ResponseContent {
+    pub status: reqwest::StatusCode,
+    pub content: String,
+    pub entity: Option<ResponseContentEntity>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseContentEntityData {
+    pub message: String,
+    pub code: u32,
+    pub data: serde_json::Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ResponseContentEntity {
+    pub error: ResponseContentEntityData,
+}
+
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let (module, e) = match self {
             Error::Reqwest(e) => ("reqwest", e.to_string()),
@@ -28,7 +41,7 @@ impl <T> fmt::Display for Error<T> {
     }
 }
 
-impl <T: fmt::Debug> error::Error for Error<T> {
+impl error::Error for Error {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         Some(match self {
             Error::Reqwest(e) => e,
@@ -39,19 +52,19 @@ impl <T: fmt::Debug> error::Error for Error<T> {
     }
 }
 
-impl <T> From<reqwest::Error> for Error<T> {
+impl From<reqwest::Error> for Error {
     fn from(e: reqwest::Error) -> Self {
         Error::Reqwest(e)
     }
 }
 
-impl <T> From<serde_json::Error> for Error<T> {
+impl From<serde_json::Error> for Error {
     fn from(e: serde_json::Error) -> Self {
         Error::Serde(e)
     }
 }
 
-impl <T> From<std::io::Error> for Error<T> {
+impl From<std::io::Error> for Error {
     fn from(e: std::io::Error) -> Self {
         Error::Io(e)
     }

@@ -11,7 +11,7 @@
 
 use reqwest;
 
-use crate::apis::ResponseContent;
+use crate::apis::{ResponseContent, ResponseContentEntity};
 use super::{Error, configuration};
 
 /// struct for passing parameters to the method [`accept_contract`]
@@ -52,44 +52,9 @@ pub struct GetContractsParams {
 }
 
 
-/// struct for typed errors of method [`accept_contract`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum AcceptContractError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`deliver_contract`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum DeliverContractError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`fulfill_contract`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum FulfillContractError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_contract`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetContractError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_contracts`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetContractsError {
-    UnknownValue(serde_json::Value),
-}
-
 
 /// Accept a contract.
-pub async fn accept_contract(configuration: &configuration::Configuration, params: AcceptContractParams) -> Result<crate::models::AcceptContract200Response, Error<AcceptContractError>> {
+pub async fn accept_contract(configuration: &configuration::Configuration, params: AcceptContractParams) -> Result<crate::models::AcceptContract200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -119,14 +84,14 @@ pub async fn accept_contract(configuration: &configuration::Configuration, param
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<AcceptContractError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Deliver cargo on a given contract.
-pub async fn deliver_contract(configuration: &configuration::Configuration, params: DeliverContractParams) -> Result<crate::models::DeliverContract200Response, Error<DeliverContractError>> {
+pub async fn deliver_contract(configuration: &configuration::Configuration, params: DeliverContractParams) -> Result<crate::models::DeliverContract200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -156,14 +121,14 @@ pub async fn deliver_contract(configuration: &configuration::Configuration, para
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<DeliverContractError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Fulfill a contract
-pub async fn fulfill_contract(configuration: &configuration::Configuration, params: FulfillContractParams) -> Result<crate::models::FulfillContract200Response, Error<FulfillContractError>> {
+pub async fn fulfill_contract(configuration: &configuration::Configuration, params: FulfillContractParams) -> Result<crate::models::FulfillContract200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -193,14 +158,14 @@ pub async fn fulfill_contract(configuration: &configuration::Configuration, para
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<FulfillContractError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Get the details of a contract by ID.
-pub async fn get_contract(configuration: &configuration::Configuration, params: GetContractParams) -> Result<crate::models::GetContract200Response, Error<GetContractError>> {
+pub async fn get_contract(configuration: &configuration::Configuration, params: GetContractParams) -> Result<crate::models::GetContract200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -230,14 +195,14 @@ pub async fn get_contract(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetContractError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// List all of your contracts.
-pub async fn get_contracts(configuration: &configuration::Configuration, params: GetContractsParams) -> Result<crate::models::GetContracts200Response, Error<GetContractsError>> {
+pub async fn get_contracts(configuration: &configuration::Configuration, params: GetContractsParams) -> Result<crate::models::GetContracts200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -274,7 +239,7 @@ pub async fn get_contracts(configuration: &configuration::Configuration, params:
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetContractsError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }

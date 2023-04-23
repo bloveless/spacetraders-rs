@@ -11,7 +11,7 @@
 
 use reqwest;
 
-use crate::apis::ResponseContent;
+use crate::apis::{ResponseContent, ResponseContentEntity};
 use super::{Error, configuration};
 
 /// struct for passing parameters to the method [`create_chart`]
@@ -184,177 +184,9 @@ pub struct WarpShipParams {
 }
 
 
-/// struct for typed errors of method [`create_chart`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CreateChartError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`create_ship_ship_scan`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CreateShipShipScanError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`create_ship_system_scan`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CreateShipSystemScanError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`create_ship_waypoint_scan`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CreateShipWaypointScanError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`create_survey`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum CreateSurveyError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`dock_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum DockShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`extract_resources`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ExtractResourcesError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_my_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetMyShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_my_ship_cargo`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetMyShipCargoError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_my_ships`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetMyShipsError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_ship_cooldown`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetShipCooldownError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_ship_nav`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetShipNavError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`jettison`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum JettisonError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`jump_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum JumpShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`navigate_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum NavigateShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`orbit_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum OrbitShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`patch_ship_nav`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PatchShipNavError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`purchase_cargo`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PurchaseCargoError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`purchase_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum PurchaseShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`refuel_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum RefuelShipError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`sell_cargo`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum SellCargoError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`ship_refine`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum ShipRefineError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`transfer_cargo`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum TransferCargoError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`warp_ship`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum WarpShipError {
-    UnknownValue(serde_json::Value),
-}
-
 
 /// Command a ship to chart the current waypoint.  Waypoints in the universe are uncharted by default. These locations will not show up in the API until they have been charted by a ship.  Charting a location will record your agent as the one who created the chart.
-pub async fn create_chart(configuration: &configuration::Configuration, params: CreateChartParams) -> Result<crate::models::CreateChart201Response, Error<CreateChartError>> {
+pub async fn create_chart(configuration: &configuration::Configuration, params: CreateChartParams) -> Result<crate::models::CreateChart201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -384,14 +216,14 @@ pub async fn create_chart(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateChartError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Activate your ship's sensor arrays to scan for ship information.
-pub async fn create_ship_ship_scan(configuration: &configuration::Configuration, params: CreateShipShipScanParams) -> Result<crate::models::CreateShipShipScan201Response, Error<CreateShipShipScanError>> {
+pub async fn create_ship_ship_scan(configuration: &configuration::Configuration, params: CreateShipShipScanParams) -> Result<crate::models::CreateShipShipScan201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -421,14 +253,14 @@ pub async fn create_ship_ship_scan(configuration: &configuration::Configuration,
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateShipShipScanError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Activate your ship's sensor arrays to scan for system information.
-pub async fn create_ship_system_scan(configuration: &configuration::Configuration, params: CreateShipSystemScanParams) -> Result<crate::models::CreateShipSystemScan201Response, Error<CreateShipSystemScanError>> {
+pub async fn create_ship_system_scan(configuration: &configuration::Configuration, params: CreateShipSystemScanParams) -> Result<crate::models::CreateShipSystemScan201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -458,14 +290,14 @@ pub async fn create_ship_system_scan(configuration: &configuration::Configuratio
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateShipSystemScanError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Activate your ship's sensor arrays to scan for waypoint information.
-pub async fn create_ship_waypoint_scan(configuration: &configuration::Configuration, params: CreateShipWaypointScanParams) -> Result<crate::models::CreateShipWaypointScan201Response, Error<CreateShipWaypointScanError>> {
+pub async fn create_ship_waypoint_scan(configuration: &configuration::Configuration, params: CreateShipWaypointScanParams) -> Result<crate::models::CreateShipWaypointScan201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -495,14 +327,14 @@ pub async fn create_ship_waypoint_scan(configuration: &configuration::Configurat
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateShipWaypointScanError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// If you want to target specific yields for an extraction, you can survey a waypoint, such as an asteroid field, and send the survey in the body of the extract request. Each survey may have multiple deposits, and if a symbol shows up more than once, that indicates a higher chance of extracting that resource.  Your ship will enter a cooldown between consecutive survey requests. Surveys will eventually expire after a period of time. Multiple ships can use the same survey for extraction.
-pub async fn create_survey(configuration: &configuration::Configuration, params: CreateSurveyParams) -> Result<crate::models::CreateSurvey201Response, Error<CreateSurveyError>> {
+pub async fn create_survey(configuration: &configuration::Configuration, params: CreateSurveyParams) -> Result<crate::models::CreateSurvey201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -532,14 +364,14 @@ pub async fn create_survey(configuration: &configuration::Configuration, params:
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<CreateSurveyError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Attempt to dock your ship at it's current location. Docking will only succeed if the waypoint is a dockable location, and your ship is capable of docking at the time of the request.  The endpoint is idempotent - successive calls will succeed even if the ship is already docked.
-pub async fn dock_ship(configuration: &configuration::Configuration, params: DockShipParams) -> Result<crate::models::DockShip200Response, Error<DockShipError>> {
+pub async fn dock_ship(configuration: &configuration::Configuration, params: DockShipParams) -> Result<crate::models::DockShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -569,14 +401,14 @@ pub async fn dock_ship(configuration: &configuration::Configuration, params: Doc
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<DockShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Extract resources from the waypoint into your ship. Send an optional survey as the payload to target specific yields.
-pub async fn extract_resources(configuration: &configuration::Configuration, params: ExtractResourcesParams) -> Result<crate::models::ExtractResources201Response, Error<ExtractResourcesError>> {
+pub async fn extract_resources(configuration: &configuration::Configuration, params: ExtractResourcesParams) -> Result<crate::models::ExtractResources201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -606,14 +438,14 @@ pub async fn extract_resources(configuration: &configuration::Configuration, par
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<ExtractResourcesError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Retrieve the details of your ship.
-pub async fn get_my_ship(configuration: &configuration::Configuration, params: GetMyShipParams) -> Result<crate::models::GetMyShip200Response, Error<GetMyShipError>> {
+pub async fn get_my_ship(configuration: &configuration::Configuration, params: GetMyShipParams) -> Result<crate::models::GetMyShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -643,14 +475,14 @@ pub async fn get_my_ship(configuration: &configuration::Configuration, params: G
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetMyShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Retrieve the cargo of your ship.
-pub async fn get_my_ship_cargo(configuration: &configuration::Configuration, params: GetMyShipCargoParams) -> Result<crate::models::GetMyShipCargo200Response, Error<GetMyShipCargoError>> {
+pub async fn get_my_ship_cargo(configuration: &configuration::Configuration, params: GetMyShipCargoParams) -> Result<crate::models::GetMyShipCargo200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -680,14 +512,14 @@ pub async fn get_my_ship_cargo(configuration: &configuration::Configuration, par
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetMyShipCargoError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Retrieve all of your ships.
-pub async fn get_my_ships(configuration: &configuration::Configuration, params: GetMyShipsParams) -> Result<crate::models::GetMyShips200Response, Error<GetMyShipsError>> {
+pub async fn get_my_ships(configuration: &configuration::Configuration, params: GetMyShipsParams) -> Result<crate::models::GetMyShips200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -724,14 +556,14 @@ pub async fn get_my_ships(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetMyShipsError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Retrieve the details of your ship's reactor cooldown. Some actions such as activating your jump drive, scanning, or extracting resources taxes your reactor and results in a cooldown.  Your ship cannot perform additional actions until your cooldown has expired. The duration of your cooldown is relative to the power consumption of the related modules or mounts for the action taken.  Response returns a 204 status code (no-content) when the ship has no cooldown.
-pub async fn get_ship_cooldown(configuration: &configuration::Configuration, params: GetShipCooldownParams) -> Result<crate::models::GetShipCooldown200Response, Error<GetShipCooldownError>> {
+pub async fn get_ship_cooldown(configuration: &configuration::Configuration, params: GetShipCooldownParams) -> Result<crate::models::GetShipCooldown200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -761,14 +593,14 @@ pub async fn get_ship_cooldown(configuration: &configuration::Configuration, par
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetShipCooldownError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Get the current nav status of a ship.
-pub async fn get_ship_nav(configuration: &configuration::Configuration, params: GetShipNavParams) -> Result<crate::models::GetShipNav200Response, Error<GetShipNavError>> {
+pub async fn get_ship_nav(configuration: &configuration::Configuration, params: GetShipNavParams) -> Result<crate::models::GetShipNav200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -798,14 +630,14 @@ pub async fn get_ship_nav(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetShipNavError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Jettison cargo from your ship's cargo hold.
-pub async fn jettison(configuration: &configuration::Configuration, params: JettisonParams) -> Result<crate::models::Jettison200Response, Error<JettisonError>> {
+pub async fn jettison(configuration: &configuration::Configuration, params: JettisonParams) -> Result<crate::models::Jettison200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -835,14 +667,14 @@ pub async fn jettison(configuration: &configuration::Configuration, params: Jett
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<JettisonError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Jump your ship instantly to a target system. Unlike other forms of navigation, jumping requires a unit of antimatter.
-pub async fn jump_ship(configuration: &configuration::Configuration, params: JumpShipParams) -> Result<crate::models::JumpShip200Response, Error<JumpShipError>> {
+pub async fn jump_ship(configuration: &configuration::Configuration, params: JumpShipParams) -> Result<crate::models::JumpShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -872,14 +704,14 @@ pub async fn jump_ship(configuration: &configuration::Configuration, params: Jum
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<JumpShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Navigate to a target destination. The destination must be located within the same system as the ship. Navigating will consume the necessary fuel and supplies from the ship's manifest, and will pay out crew wages from the agent's account.  The returned response will detail the route information including the expected time of arrival. Most ship actions are unavailable until the ship has arrived at it's destination.  To travel between systems, see the ship's warp or jump actions.
-pub async fn navigate_ship(configuration: &configuration::Configuration, params: NavigateShipParams) -> Result<crate::models::NavigateShip200Response, Error<NavigateShipError>> {
+pub async fn navigate_ship(configuration: &configuration::Configuration, params: NavigateShipParams) -> Result<crate::models::NavigateShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -909,14 +741,14 @@ pub async fn navigate_ship(configuration: &configuration::Configuration, params:
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<NavigateShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Attempt to move your ship into orbit at it's current location. The request will only succeed if your ship is capable of moving into orbit at the time of the request.  The endpoint is idempotent - successive calls will succeed even if the ship is already in orbit.
-pub async fn orbit_ship(configuration: &configuration::Configuration, params: OrbitShipParams) -> Result<crate::models::OrbitShip200Response, Error<OrbitShipError>> {
+pub async fn orbit_ship(configuration: &configuration::Configuration, params: OrbitShipParams) -> Result<crate::models::OrbitShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -946,14 +778,14 @@ pub async fn orbit_ship(configuration: &configuration::Configuration, params: Or
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<OrbitShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Update the nav data of a ship, such as the flight mode.
-pub async fn patch_ship_nav(configuration: &configuration::Configuration, params: PatchShipNavParams) -> Result<crate::models::GetShipNav200Response, Error<PatchShipNavError>> {
+pub async fn patch_ship_nav(configuration: &configuration::Configuration, params: PatchShipNavParams) -> Result<crate::models::GetShipNav200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -983,14 +815,14 @@ pub async fn patch_ship_nav(configuration: &configuration::Configuration, params
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<PatchShipNavError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Purchase cargo.
-pub async fn purchase_cargo(configuration: &configuration::Configuration, params: PurchaseCargoParams) -> Result<crate::models::PurchaseCargo201Response, Error<PurchaseCargoError>> {
+pub async fn purchase_cargo(configuration: &configuration::Configuration, params: PurchaseCargoParams) -> Result<crate::models::PurchaseCargo201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1020,14 +852,14 @@ pub async fn purchase_cargo(configuration: &configuration::Configuration, params
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<PurchaseCargoError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Purchase a ship
-pub async fn purchase_ship(configuration: &configuration::Configuration, params: PurchaseShipParams) -> Result<crate::models::PurchaseShip201Response, Error<PurchaseShipError>> {
+pub async fn purchase_ship(configuration: &configuration::Configuration, params: PurchaseShipParams) -> Result<crate::models::PurchaseShip201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1056,14 +888,14 @@ pub async fn purchase_ship(configuration: &configuration::Configuration, params:
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<PurchaseShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Refuel your ship from the local market.
-pub async fn refuel_ship(configuration: &configuration::Configuration, params: RefuelShipParams) -> Result<crate::models::RefuelShip200Response, Error<RefuelShipError>> {
+pub async fn refuel_ship(configuration: &configuration::Configuration, params: RefuelShipParams) -> Result<crate::models::RefuelShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1093,14 +925,14 @@ pub async fn refuel_ship(configuration: &configuration::Configuration, params: R
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<RefuelShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Sell cargo.
-pub async fn sell_cargo(configuration: &configuration::Configuration, params: SellCargoParams) -> Result<crate::models::SellCargo201Response, Error<SellCargoError>> {
+pub async fn sell_cargo(configuration: &configuration::Configuration, params: SellCargoParams) -> Result<crate::models::SellCargo201Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1130,14 +962,14 @@ pub async fn sell_cargo(configuration: &configuration::Configuration, params: Se
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<SellCargoError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Attempt to refine the raw materials on your ship. The request will only succeed if your ship is capable of refining at the time of the request.
-pub async fn ship_refine(configuration: &configuration::Configuration, params: ShipRefineParams) -> Result<crate::models::ShipRefine200Response, Error<ShipRefineError>> {
+pub async fn ship_refine(configuration: &configuration::Configuration, params: ShipRefineParams) -> Result<crate::models::ShipRefine200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1167,14 +999,14 @@ pub async fn ship_refine(configuration: &configuration::Configuration, params: S
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<ShipRefineError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Transfer cargo between ships.
-pub async fn transfer_cargo(configuration: &configuration::Configuration, params: TransferCargoParams) -> Result<crate::models::TransferCargo200Response, Error<TransferCargoError>> {
+pub async fn transfer_cargo(configuration: &configuration::Configuration, params: TransferCargoParams) -> Result<crate::models::TransferCargo200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1204,14 +1036,14 @@ pub async fn transfer_cargo(configuration: &configuration::Configuration, params
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<TransferCargoError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Warp your ship to a target destination in another system. Warping will consume the necessary fuel and supplies from the ship's manifest, and will pay out crew wages from the agent's account.  The returned response will detail the route information including the expected time of arrival. Most ship actions are unavailable until the ship has arrived at it's destination.
-pub async fn warp_ship(configuration: &configuration::Configuration, params: WarpShipParams) -> Result<crate::models::NavigateShip200Response, Error<WarpShipError>> {
+pub async fn warp_ship(configuration: &configuration::Configuration, params: WarpShipParams) -> Result<crate::models::NavigateShip200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -1241,7 +1073,7 @@ pub async fn warp_ship(configuration: &configuration::Configuration, params: War
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<WarpShipError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }

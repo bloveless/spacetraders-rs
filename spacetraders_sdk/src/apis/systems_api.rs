@@ -11,7 +11,7 @@
 
 use reqwest;
 
-use crate::apis::ResponseContent;
+use crate::apis::{ResponseContent, ResponseContentEntity};
 use super::{Error, configuration};
 
 /// struct for passing parameters to the method [`get_jump_gate`]
@@ -78,58 +78,9 @@ pub struct GetWaypointParams {
 }
 
 
-/// struct for typed errors of method [`get_jump_gate`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetJumpGateError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_market`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetMarketError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_shipyard`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetShipyardError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_system`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetSystemError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_system_waypoints`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetSystemWaypointsError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_systems`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetSystemsError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_waypoint`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetWaypointError {
-    UnknownValue(serde_json::Value),
-}
-
 
 /// Get jump gate details for a waypoint.
-pub async fn get_jump_gate(configuration: &configuration::Configuration, params: GetJumpGateParams) -> Result<crate::models::GetJumpGate200Response, Error<GetJumpGateError>> {
+pub async fn get_jump_gate(configuration: &configuration::Configuration, params: GetJumpGateParams) -> Result<crate::models::GetJumpGate200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -160,14 +111,14 @@ pub async fn get_jump_gate(configuration: &configuration::Configuration, params:
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetJumpGateError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Retrieve imports, exports and exchange data from a marketplace. Imports can be sold, exports can be purchased, and exchange goods can be purchased or sold. Send a ship to the waypoint to access trade good prices and recent transactions.
-pub async fn get_market(configuration: &configuration::Configuration, params: GetMarketParams) -> Result<crate::models::GetMarket200Response, Error<GetMarketError>> {
+pub async fn get_market(configuration: &configuration::Configuration, params: GetMarketParams) -> Result<crate::models::GetMarket200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -198,14 +149,14 @@ pub async fn get_market(configuration: &configuration::Configuration, params: Ge
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetMarketError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Get the shipyard for a waypoint.
-pub async fn get_shipyard(configuration: &configuration::Configuration, params: GetShipyardParams) -> Result<crate::models::GetShipyard200Response, Error<GetShipyardError>> {
+pub async fn get_shipyard(configuration: &configuration::Configuration, params: GetShipyardParams) -> Result<crate::models::GetShipyard200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -236,14 +187,14 @@ pub async fn get_shipyard(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetShipyardError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Get the details of a system.
-pub async fn get_system(configuration: &configuration::Configuration, params: GetSystemParams) -> Result<crate::models::GetSystem200Response, Error<GetSystemError>> {
+pub async fn get_system(configuration: &configuration::Configuration, params: GetSystemParams) -> Result<crate::models::GetSystem200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -273,14 +224,14 @@ pub async fn get_system(configuration: &configuration::Configuration, params: Ge
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetSystemError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Fetch all of the waypoints for a given system. System must be charted or a ship must be present to return waypoint details.
-pub async fn get_system_waypoints(configuration: &configuration::Configuration, params: GetSystemWaypointsParams) -> Result<crate::models::GetSystemWaypoints200Response, Error<GetSystemWaypointsError>> {
+pub async fn get_system_waypoints(configuration: &configuration::Configuration, params: GetSystemWaypointsParams) -> Result<crate::models::GetSystemWaypoints200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -318,14 +269,14 @@ pub async fn get_system_waypoints(configuration: &configuration::Configuration, 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetSystemWaypointsError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// Return a list of all systems.
-pub async fn get_systems(configuration: &configuration::Configuration, params: GetSystemsParams) -> Result<crate::models::GetSystems200Response, Error<GetSystemsError>> {
+pub async fn get_systems(configuration: &configuration::Configuration, params: GetSystemsParams) -> Result<crate::models::GetSystems200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -362,14 +313,14 @@ pub async fn get_systems(configuration: &configuration::Configuration, params: G
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetSystemsError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// View the details of a waypoint.
-pub async fn get_waypoint(configuration: &configuration::Configuration, params: GetWaypointParams) -> Result<crate::models::GetWaypoint200Response, Error<GetWaypointError>> {
+pub async fn get_waypoint(configuration: &configuration::Configuration, params: GetWaypointParams) -> Result<crate::models::GetWaypoint200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -400,7 +351,7 @@ pub async fn get_waypoint(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetWaypointError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }

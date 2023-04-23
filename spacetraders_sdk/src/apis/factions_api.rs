@@ -11,7 +11,7 @@
 
 use reqwest;
 
-use crate::apis::ResponseContent;
+use crate::apis::{ResponseContent, ResponseContentEntity};
 use super::{Error, configuration};
 
 /// struct for passing parameters to the method [`get_faction`]
@@ -31,23 +31,9 @@ pub struct GetFactionsParams {
 }
 
 
-/// struct for typed errors of method [`get_faction`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetFactionError {
-    UnknownValue(serde_json::Value),
-}
-
-/// struct for typed errors of method [`get_factions`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetFactionsError {
-    UnknownValue(serde_json::Value),
-}
-
 
 /// View the details of a faction.
-pub async fn get_faction(configuration: &configuration::Configuration, params: GetFactionParams) -> Result<crate::models::GetFaction200Response, Error<GetFactionError>> {
+pub async fn get_faction(configuration: &configuration::Configuration, params: GetFactionParams) -> Result<crate::models::GetFaction200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -77,14 +63,14 @@ pub async fn get_faction(configuration: &configuration::Configuration, params: G
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetFactionError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
 }
 
 /// List all discovered factions in the game.
-pub async fn get_factions(configuration: &configuration::Configuration, params: GetFactionsParams) -> Result<crate::models::GetFactions200Response, Error<GetFactionsError>> {
+pub async fn get_factions(configuration: &configuration::Configuration, params: GetFactionsParams) -> Result<crate::models::GetFactions200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -121,7 +107,7 @@ pub async fn get_factions(configuration: &configuration::Configuration, params: 
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetFactionsError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }

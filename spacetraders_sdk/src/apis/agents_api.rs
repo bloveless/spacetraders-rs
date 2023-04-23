@@ -11,20 +11,13 @@
 
 use reqwest;
 
-use crate::apis::ResponseContent;
+use crate::apis::{ResponseContent, ResponseContentEntity};
 use super::{Error, configuration};
 
 
-/// struct for typed errors of method [`get_my_agent`]
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum GetMyAgentError {
-    UnknownValue(serde_json::Value),
-}
-
 
 /// Fetch your agent's details.
-pub async fn get_my_agent(configuration: &configuration::Configuration) -> Result<crate::models::GetMyAgent200Response, Error<GetMyAgentError>> {
+pub async fn get_my_agent(configuration: &configuration::Configuration) -> Result<crate::models::GetMyAgent200Response, Error> {
     let local_var_configuration = configuration;
 
     // unbox the parameters
@@ -53,7 +46,7 @@ pub async fn get_my_agent(configuration: &configuration::Configuration) -> Resul
     if !local_var_status.is_client_error() && !local_var_status.is_server_error() {
         serde_json::from_str(&local_var_content).map_err(Error::from)
     } else {
-        let local_var_entity: Option<GetMyAgentError> = serde_json::from_str(&local_var_content).ok();
+        let local_var_entity: Option<ResponseContentEntity> = serde_json::from_str(&local_var_content).ok();
         let local_var_error = ResponseContent { status: local_var_status, content: local_var_content, entity: local_var_entity };
         Err(Error::ResponseError(local_var_error))
     }
