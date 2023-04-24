@@ -1,3 +1,6 @@
+#[macro_use]
+extern crate log;
+
 use chrono::{DateTime, Local};
 use spacetraders_sdk::apis::agents_api::get_my_agent;
 use spacetraders_sdk::apis::configuration::Configuration;
@@ -31,6 +34,8 @@ fn get_error_message(e: Error) -> String {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    env_logger::init();
+
     let conf = Configuration {
         bearer_access_token: Some(BLOVE_TOKEN.to_string()),
         ..Default::default()
@@ -40,10 +45,10 @@ async fn main() -> anyhow::Result<()> {
     //     Some(RegisterRequest::new(Faction::Cosmic, "blove".to_string()))
     // ).await?;
 
-    // println!("Register Response: {:?}", register_response);
+    // info!("Register Response: {:?}", register_response);
 
     let my_agent = get_my_agent(&conf).await?;
-    println!("My agent: {:#?}", my_agent);
+    info!("My agent: {:#?}", my_agent);
 
     // let my_contracts = get_contracts(
     //     &conf,
@@ -53,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // println!("My contracts {:#?}", my_contracts);
+    // info!("My contracts {:#?}", my_contracts);
 
     // let my_faction = get_faction(
     //     &conf,
@@ -62,7 +67,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // println!("My faction {:#?}", my_faction);
+    // info!("My faction {:#?}", my_faction);
 
     let my_ships = get_my_ships(
         &conf,
@@ -72,7 +77,7 @@ async fn main() -> anyhow::Result<()> {
         },
     )
     .await?;
-    println!("My ships {:#?}", my_ships);
+    info!("My ships {:#?}", my_ships);
 
     // let starting_waypoint = get_waypoint(
     //     &conf,
@@ -82,7 +87,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // println!("Starting waypoint: {:#?}", starting_waypoint);
+    // info!("Starting waypoint: {:#?}", starting_waypoint);
 
     // let accepted_contract = accept_contract(
     //     &conf,
@@ -93,19 +98,19 @@ async fn main() -> anyhow::Result<()> {
     // .await;
     //
     // match accepted_contract {
-    //     Ok(ac) => println!("Accepted Contract: {:#?}", ac),
-    //     Err(e) => println!("Accept contract failed: {}", get_error_message(e)),
+    //     Ok(ac) => info!("Accepted Contract: {:#?}", ac),
+    //     Err(e) => error!("Accept contract failed: {}", get_error_message(e)),
     // }
 
     let my_contract = get_contract(&conf, GetContractParams { contract_id: CONTRACT_ID.to_string() }).await?;
-    println!("My Contract: {:#?}", my_contract);
+    info!("My Contract: {:#?}", my_contract);
 
     // Find a shipyard
     // let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
     //     system_symbol: "X1-DF55".to_string(),
     //     ..Default::default()
     // }).await?;
-    // println!("Waypoints: {:#?}", waypoints);
+    // info!("Waypoints: {:#?}", waypoints);
 
     // let shipyard = waypoints.data.into_iter().find(|w| {
     //     w.traits.clone().into_iter().find(|t| t.symbol == Symbol::Shipyard).is_some()
@@ -113,10 +118,10 @@ async fn main() -> anyhow::Result<()> {
     //
     // let shipyard = match shipyard {
     //     Some(s) => s,
-    //     None => panic!("unable to find available shipyard")
+    //     None => error!("unable to find available shipyard")
     // };
     //
-    // println!("First shipyard: {:?}", shipyard);
+    // info!("First shipyard: {:?}", shipyard);
 
     let shipyard_waypoint_symbol = "X1-DF55-69207D";
     let shipyard_system_symbol = "X1-DF55";
@@ -126,7 +131,7 @@ async fn main() -> anyhow::Result<()> {
     //     waypoint_symbol: shipyard_waypoint_symbol.to_string(),
     // }).await;
     //
-    // println!("Shipyard data: {:?}", shipyard_data);
+    // info!("Shipyard data: {:?}", shipyard_data);
 
     // Purchase a ship
     // let ship = purchase_ship(&conf, PurchaseShipParams {
@@ -135,7 +140,7 @@ async fn main() -> anyhow::Result<()> {
     //         ship_type: ShipType::MiningDrone,
     //     })
     // }).await?;
-    // println!("Purchased ship: {:?}", ship);
+    // info!("Purchased ship: {:?}", ship);
 
     let asteroid_field_waypoint_symbol = "X1-DF55-17335A";
     let mining_ship_symbol = "BLOVE-2";
@@ -148,25 +153,25 @@ async fn main() -> anyhow::Result<()> {
     // }).await;
     //
     // match nav_results {
-    //     Ok(nav) => println!("Nav results: {:?}", nav),
-    //     Err(e) => println!("Nav results error: {:?}", get_error_message(e)),
+    //     Ok(nav) => info!("Nav results: {:?}", nav),
+    //     Err(e) => error!("Nav results error: {:?}", get_error_message(e)),
     // }
 
     // let dock_results = dock_ship(&conf, DockShipParams {
     //     ship_symbol: mining_ship_symbol.to_string(),
     // }).await?;
-    // println!("Dock results: {:?}", dock_results);
+    // info!("Dock results: {:?}", dock_results);
 
     // let refuel_results = refuel_ship(&conf, RefuelShipParams {
     //     ship_symbol: mining_ship_symbol.to_string(),
     // }).await?;
-    // println!("Refuel results: {:?}", refuel_results);
+    // info!("Refuel results: {:?}", refuel_results);
 
     // Orbit ship
     // let orbit_results = orbit_ship(&conf, OrbitShipParams {
     //     ship_symbol: mining_ship_symbol.to_string(),
     // }).await?;
-    // println!("Orbit results: {:?}", orbit_results);
+    // info!("Orbit results: {:?}", orbit_results);
 
     loop {
         let ship = get_my_ship(&conf, GetMyShipParams {
@@ -174,18 +179,18 @@ async fn main() -> anyhow::Result<()> {
         }).await?;
         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-        println!("Current ship capacity is {} and current cargo units is {}", ship.data.cargo.capacity, ship.data.cargo.units);
-        println!("Current ship cargo is {:?}", ship.data.cargo.inventory);
+        info!("Current ship capacity is {} and current cargo units is {}", ship.data.cargo.capacity, ship.data.cargo.units);
+        info!("Current ship cargo is {:?}", ship.data.cargo.inventory);
 
         for i in ship.data.cargo.inventory.clone() {
             if &i.symbol == "ALUMINUM_ORE" && i.units >= (ship.data.cargo.capacity - 10) {
-                println!("Ship is full of {}", i.symbol);
+                info!("Ship is full of {}", i.symbol);
 
                 let deliver_goods= my_contract.data.terms.deliver.clone().unwrap();
                 let deliver_good = deliver_goods.get(0).unwrap().clone();
 
                 let delivery_waypoint_symbol = deliver_good.destination_symbol;
-                println!("Navigating to delivery waypoint {}", delivery_waypoint_symbol);
+                info!("Navigating to delivery waypoint {}", delivery_waypoint_symbol);
                 let navigation_results = navigate_ship(&conf, NavigateShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                     navigate_ship_request: Some(NavigateShipRequest {
@@ -194,25 +199,25 @@ async fn main() -> anyhow::Result<()> {
                 }).await;
                 match navigation_results {
                     Ok(nr) => {
-                        println!("Navigation results: {:?}", nr);
+                        info!("Navigation results: {:?}", nr);
 
                         let arrival = DateTime::parse_from_rfc3339(&nr.data.nav.route.arrival).unwrap();
                         let arrival_seconds = arrival.signed_duration_since(Local::now());
-                        println!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
+                        info!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
                         tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
                     },
-                    Err(nre) => println!("Navigation results error: {:?}", get_error_message(nre)),
+                    Err(nre) => error!("Navigation results error: {:?}", get_error_message(nre)),
                 };
 
                 let dock_result = dock_ship(&conf, DockShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
                 match dock_result {
-                    Ok(dr) => println!("Dock result: {:?}", dr),
-                    Err(dre) => println!("Dock result error: {:?}", get_error_message(dre)),
+                    Ok(dr) => info!("Dock result: {:?}", dr),
+                    Err(dre) => error!("Dock result error: {:?}", get_error_message(dre)),
                 }
 
-                println!("Delivering {} of {} to {}", i.units, i.symbol, delivery_waypoint_symbol);
+                info!("Delivering {} of {} to {}", i.units, i.symbol, delivery_waypoint_symbol);
                 let delivery_result = deliver_contract(&conf, DeliverContractParams {
                     contract_id: CONTRACT_ID.to_string(),
                     deliver_contract_request: Some(DeliverContractRequest {
@@ -223,18 +228,18 @@ async fn main() -> anyhow::Result<()> {
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 match delivery_result {
-                    Ok(dr) => println!("Delivery result: {:?}", dr),
-                    Err(dre) => panic!("Delivery result error: {:?}", get_error_message(dre)),
+                    Ok(dr) => info!("Delivery result: {:?}", dr),
+                    Err(dre) => error!("Delivery result error: {:?}", get_error_message(dre)),
                 }
 
-                println!("Going back into orbit");
+                info!("Going back into orbit");
                 let orbit_result = orbit_ship(&conf, OrbitShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                println!("Orbit result: {:?}", orbit_result);
+                info!("Orbit result: {:?}", orbit_result);
 
-                println!("Returning to asteroid field");
+                info!("Returning to asteroid field");
                 let nav_results = navigate_ship(&conf, NavigateShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                     navigate_ship_request: Some(NavigateShipRequest {
@@ -242,47 +247,47 @@ async fn main() -> anyhow::Result<()> {
                     }),
                 }).await?;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                println!("Navigation results: {:?}", nav_results);
+                info!("Navigation results: {:?}", nav_results);
 
                 let arrival = DateTime::parse_from_rfc3339(&nav_results.data.nav.route.arrival).unwrap();
                 let arrival_seconds = arrival.signed_duration_since(Local::now());
-                println!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
+                info!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
                 tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
 
-                println!("Docking ship to refuel");
+                info!("Docking ship to refuel");
                 let docking_result = dock_ship(&conf, DockShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                println!("Docking Result: {:?}", docking_result);
+                info!("Docking Result: {:?}", docking_result);
 
-                println!("Refueling");
+                info!("Refueling");
                 let refueling_result = refuel_ship(&conf, RefuelShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                println!("Refueling result: {:?}", refueling_result);
+                info!("Refueling result: {:?}", refueling_result);
 
-                println!("Going back into orbit");
+                info!("Going back into orbit");
                 let orbit_result = orbit_ship(&conf, OrbitShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                println!("Orbit result: {:?}", orbit_result);
+                info!("Orbit result: {:?}", orbit_result);
             }
         }
 
         if ship.data.cargo.units == ship.data.cargo.capacity {
-            println!("Docking");
+            info!("Docking");
             let dock_results = dock_ship(&conf, DockShipParams {
                 ship_symbol: mining_ship_symbol.to_string(),
             }).await?;
-            println!("Dock results: {:?}", dock_results);
+            info!("Dock results: {:?}", dock_results);
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
             for i in ship.data.cargo.inventory.clone() {
                 if &i.symbol != "ALUMINUM_ORE" {
-                    println!("Selling {} of {}", i.units, i.symbol);
+                    info!("Selling {} of {}", i.units, i.symbol);
                     let sell_results = sell_cargo(&conf, SellCargoParams {
                         ship_symbol: mining_ship_symbol.to_string(),
                         sell_cargo_request: Some(SellCargoRequest {
@@ -291,35 +296,35 @@ async fn main() -> anyhow::Result<()> {
                         }),
                     }).await;
                     match sell_results {
-                        Ok(sr) => println!("Sell results: {:?}", sr),
-                        Err(sre) => panic!("Sell results error: {:?}", sre),
+                        Ok(sr) => info!("Sell results: {:?}", sr),
+                        Err(sre) => error!("Sell results error: {:?}", sre),
                     }
                     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 }
             }
 
-            println!("Going into orbit");
+            info!("Going into orbit");
             let orbit_results = orbit_ship(&conf, OrbitShipParams {
                 ship_symbol: mining_ship_symbol.to_string(),
             }).await?;
-            println!("Orbit results: {:?}", orbit_results);
+            info!("Orbit results: {:?}", orbit_results);
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
 
-        println!("Extracting");
+        info!("Extracting");
         let extract_results = extract_resources(&conf, ExtractResourcesParams {
             ship_symbol: mining_ship_symbol.to_string(),
             extract_resources_request: None,
         }).await;
         match extract_results {
             Ok(er) => {
-                println!("Extract results: {:?}", er);
-                println!("Cooling down for {} seconds", er.data.cooldown.remaining_seconds);
+                info!("Extract results: {:?}", er);
+                info!("Cooling down for {} seconds", er.data.cooldown.remaining_seconds);
                 tokio::time::sleep(tokio::time::Duration::from_secs(er.data.cooldown.remaining_seconds as u64)).await;
-                println!("Cool down over");
+                info!("Cool down over");
             },
             Err(e) => {
-                println!("Extract error (waiting 10 seconds and retrying): {:?}", get_error_message(e));
+                error!("Extract error (waiting 10 seconds and retrying): {:?}", get_error_message(e));
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
             },
         }
