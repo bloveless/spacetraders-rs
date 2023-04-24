@@ -22,3 +22,4 @@ Cargo.lock
 Session.vim
 .idea
 .vscode
+output.log
