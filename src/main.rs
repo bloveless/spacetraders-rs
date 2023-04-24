@@ -1,12 +1,13 @@
+use chrono::{DateTime, Local};
 use spacetraders_sdk::apis::agents_api::get_my_agent;
 use spacetraders_sdk::apis::configuration::Configuration;
-use spacetraders_sdk::apis::contracts_api::{accept_contract, get_contracts, AcceptContractParams, GetContractsParams, get_contract, GetContractParams};
+use spacetraders_sdk::apis::contracts_api::{accept_contract, get_contracts, AcceptContractParams, GetContractsParams, get_contract, GetContractParams, deliver_contract, DeliverContractParams};
 use spacetraders_sdk::apis::factions_api::{get_faction, GetFactionParams};
-use spacetraders_sdk::apis::fleet_api::{dock_ship, DockShipParams, extract_resources, ExtractResourcesParams, get_my_ships, GetMyShipsParams, navigate_ship, NavigateShipParams, orbit_ship, OrbitShipParams, purchase_ship, PurchaseShipParams, refuel_ship, RefuelShipParams};
+use spacetraders_sdk::apis::fleet_api::{dock_ship, DockShipParams, extract_resources, ExtractResourcesParams, get_my_ship, get_my_ships, GetMyShipParams, GetMyShipsParams, navigate_ship, NavigateShipParams, orbit_ship, OrbitShipParams, purchase_ship, PurchaseShipParams, refuel_ship, RefuelShipParams, sell_cargo, SellCargoParams};
 use spacetraders_sdk::apis::systems_api::{get_shipyard, get_system_waypoints, get_waypoint, GetShipyardParams, GetSystemWaypointsParams, GetWaypointParams};
 use spacetraders_sdk::apis::{Error, ResponseContent};
 use spacetraders_sdk::models::waypoint_trait::Symbol;
-use spacetraders_sdk::models::{ExtractResourcesRequest, NavigateShipRequest, PurchaseShipRequest, ShipType, Survey, WaypointTrait};
+use spacetraders_sdk::models::{DeliverContractRequest, ExtractResourcesRequest, NavigateShipRequest, PurchaseShipRequest, SellCargoRequest, ShipCargoItem, ShipType, Survey, WaypointTrait};
 
 // const blove_account_id = "clgq3deon3qs5s60d7y09d7gg";
 const BASE_URL: &str = "https://api.spacetraders.io";
@@ -63,15 +64,15 @@ async fn main() -> anyhow::Result<()> {
     // .await?;
     // println!("My faction {:#?}", my_faction);
 
-    // let my_ships = get_my_ships(
-    //     &conf,
-    //     GetMyShipsParams {
-    //         page: None,
-    //         limit: None,
-    //     },
-    // )
-    // .await?;
-    // println!("My ships {:#?}", my_ships);
+    let my_ships = get_my_ships(
+        &conf,
+        GetMyShipsParams {
+            page: None,
+            limit: None,
+        },
+    )
+    .await?;
+    println!("My ships {:#?}", my_ships);
 
     // let starting_waypoint = get_waypoint(
     //     &conf,
@@ -100,11 +101,11 @@ async fn main() -> anyhow::Result<()> {
     println!("My Contract: {:#?}", my_contract);
 
     // Find a shipyard
-    let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
-        system_symbol: "X1-DF55".to_string(),
-        ..Default::default()
-    }).await?;
-    println!("Waypoints: {:#?}", waypoints);
+    // let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
+    //     system_symbol: "X1-DF55".to_string(),
+    //     ..Default::default()
+    // }).await?;
+    // println!("Waypoints: {:#?}", waypoints);
 
     // let shipyard = waypoints.data.into_iter().find(|w| {
     //     w.traits.clone().into_iter().find(|t| t.symbol == Symbol::Shipyard).is_some()
@@ -136,7 +137,7 @@ async fn main() -> anyhow::Result<()> {
     // }).await?;
     // println!("Purchased ship: {:?}", ship);
 
-    let asteroid_field_waypoint_symbol = "X1-DF55-69207D";
+    let asteroid_field_waypoint_symbol = "X1-DF55-17335A";
     let mining_ship_symbol = "BLOVE-2";
 
     // let nav_results = navigate_ship(&conf, NavigateShipParams {
@@ -167,14 +168,160 @@ async fn main() -> anyhow::Result<()> {
     // }).await?;
     // println!("Orbit results: {:?}", orbit_results);
 
-    // let extract_results = extract_resources(&conf, ExtractResourcesParams {
-    //     ship_symbol: mining_ship_symbol.to_string(),
-    //     extract_resources_request: None,
-    // }).await;
-    // match extract_results {
-    //     Ok(er) => println!("Extract results: {:?}", er),
-    //     Err(e) => println!("Extract error: {:?}", get_error_message(e)),
-    // }
+    loop {
+        let ship = get_my_ship(&conf, GetMyShipParams {
+            ship_symbol: mining_ship_symbol.to_string(),
+        }).await?;
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-    Ok(())
+        println!("Current ship capacity is {} and current cargo units is {}", ship.data.cargo.capacity, ship.data.cargo.units);
+        println!("Current ship cargo is {:?}", ship.data.cargo.inventory);
+
+        for i in ship.data.cargo.inventory.clone() {
+            if &i.symbol == "ALUMINUM_ORE" && i.units >= (ship.data.cargo.capacity - 10) {
+                println!("Ship is full of {}", i.symbol);
+
+                let deliver_goods= my_contract.data.terms.deliver.clone().unwrap();
+                let deliver_good = deliver_goods.get(0).unwrap().clone();
+
+                let delivery_waypoint_symbol = deliver_good.destination_symbol;
+                println!("Navigating to delivery waypoint {}", delivery_waypoint_symbol);
+                let navigation_results = navigate_ship(&conf, NavigateShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                    navigate_ship_request: Some(NavigateShipRequest {
+                        waypoint_symbol: delivery_waypoint_symbol.to_string()
+                    })
+                }).await;
+                match navigation_results {
+                    Ok(nr) => {
+                        println!("Navigation results: {:?}", nr);
+
+                        let arrival = DateTime::parse_from_rfc3339(&nr.data.nav.route.arrival).unwrap();
+                        let arrival_seconds = arrival.signed_duration_since(Local::now());
+                        println!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
+                        tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
+                    },
+                    Err(nre) => println!("Navigation results error: {:?}", get_error_message(nre)),
+                };
+
+                let dock_result = dock_ship(&conf, DockShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                match dock_result {
+                    Ok(dr) => println!("Dock result: {:?}", dr),
+                    Err(dre) => println!("Dock result error: {:?}", get_error_message(dre)),
+                }
+
+                println!("Delivering {} of {} to {}", i.units, i.symbol, delivery_waypoint_symbol);
+                let delivery_result = deliver_contract(&conf, DeliverContractParams {
+                    contract_id: CONTRACT_ID.to_string(),
+                    deliver_contract_request: Some(DeliverContractRequest {
+                        ship_symbol: mining_ship_symbol.to_string(),
+                        trade_symbol: i.symbol,
+                        units: i.units,
+                    })
+                }).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                match delivery_result {
+                    Ok(dr) => println!("Delivery result: {:?}", dr),
+                    Err(dre) => panic!("Delivery result error: {:?}", get_error_message(dre)),
+                }
+
+                println!("Going back into orbit");
+                let orbit_result = orbit_ship(&conf, OrbitShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                println!("Orbit result: {:?}", orbit_result);
+
+                println!("Returning to asteroid field");
+                let nav_results = navigate_ship(&conf, NavigateShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                    navigate_ship_request: Some(NavigateShipRequest {
+                        waypoint_symbol: asteroid_field_waypoint_symbol.to_string(),
+                    }),
+                }).await?;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                println!("Navigation results: {:?}", nav_results);
+
+                let arrival = DateTime::parse_from_rfc3339(&nav_results.data.nav.route.arrival).unwrap();
+                let arrival_seconds = arrival.signed_duration_since(Local::now());
+                println!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
+                tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
+
+                println!("Docking ship to refuel");
+                let docking_result = dock_ship(&conf, DockShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                println!("Docking Result: {:?}", docking_result);
+
+                println!("Refueling");
+                let refueling_result = refuel_ship(&conf, RefuelShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                println!("Refueling result: {:?}", refueling_result);
+
+                println!("Going back into orbit");
+                let orbit_result = orbit_ship(&conf, OrbitShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                println!("Orbit result: {:?}", orbit_result);
+            }
+        }
+
+        if ship.data.cargo.units == ship.data.cargo.capacity {
+            println!("Docking");
+            let dock_results = dock_ship(&conf, DockShipParams {
+                ship_symbol: mining_ship_symbol.to_string(),
+            }).await?;
+            println!("Dock results: {:?}", dock_results);
+            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+            for i in ship.data.cargo.inventory.clone() {
+                if &i.symbol != "ALUMINUM_ORE" {
+                    println!("Selling {} of {}", i.units, i.symbol);
+                    let sell_results = sell_cargo(&conf, SellCargoParams {
+                        ship_symbol: mining_ship_symbol.to_string(),
+                        sell_cargo_request: Some(SellCargoRequest {
+                            symbol: i.symbol,
+                            units: i.units,
+                        }),
+                    }).await;
+                    match sell_results {
+                        Ok(sr) => println!("Sell results: {:?}", sr),
+                        Err(sre) => panic!("Sell results error: {:?}", sre),
+                    }
+                    tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+                }
+            }
+
+            println!("Going into orbit");
+            let orbit_results = orbit_ship(&conf, OrbitShipParams {
+                ship_symbol: mining_ship_symbol.to_string(),
+            }).await?;
+            println!("Orbit results: {:?}", orbit_results);
+            tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        }
+
+        println!("Extracting");
+        let extract_results = extract_resources(&conf, ExtractResourcesParams {
+            ship_symbol: mining_ship_symbol.to_string(),
+            extract_resources_request: None,
+        }).await;
+        match extract_results {
+            Ok(er) => {
+                println!("Extract results: {:?}", er);
+                println!("Cooling down for {} seconds", er.data.cooldown.remaining_seconds);
+                tokio::time::sleep(tokio::time::Duration::from_secs(er.data.cooldown.remaining_seconds as u64)).await;
+                println!("Cool down over");
+            },
+            Err(e) => {
+                println!("Extract error (waiting 10 seconds and retrying): {:?}", get_error_message(e));
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+            },
+        }
+    }
 }
