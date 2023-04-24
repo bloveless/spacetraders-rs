@@ -2,6 +2,7 @@
 extern crate log;
 
 use chrono::{DateTime, Local};
+use env_logger::{Env, Target};
 use spacetraders_sdk::apis::agents_api::get_my_agent;
 use spacetraders_sdk::apis::configuration::Configuration;
 use spacetraders_sdk::apis::contracts_api::{accept_contract, get_contracts, AcceptContractParams, GetContractsParams, get_contract, GetContractParams, deliver_contract, DeliverContractParams};
@@ -34,12 +35,17 @@ fn get_error_message(e: Error) -> String {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    env_logger::init();
+    let env = Env::default()
+        .filter_or("RUST_LOG", "spacetraders_rs=trace")
+        .write_style_or("RUST_LOG_STYLE", "always");
+
+    env_logger::Builder::from_env(env).target(Target::Stdout).init();
 
     let conf = Configuration {
         bearer_access_token: Some(BLOVE_TOKEN.to_string()),
         ..Default::default()
     };
+
     // let register_response = register(
     //     &conf,
     //     Some(RegisterRequest::new(Faction::Cosmic, "blove".to_string()))
