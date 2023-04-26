@@ -329,7 +329,7 @@ async fn main() -> anyhow::Result<()> {
                         if !cr.data.fulfilled && cr.data.terms.deliver.unwrap().iter().all(|i| i.units_fulfilled == i.units_required) {
                             let fulfill_contract_results = fulfill_contract(&conf, FulfillContractParams {
                                 contract_id: CONTRACT_ID.to_string(),
-                            });
+                            }).await;
 
                             match fulfill_contract_results {
                                 Ok(fcr) => info!("Fulfill contract results: {:?}", fcr),
