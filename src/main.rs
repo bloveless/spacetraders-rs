@@ -1,11 +1,12 @@
 #[macro_use]
 extern crate log;
 
+use std::process;
 use chrono::{DateTime, Local};
 use env_logger::{Env, Target};
 use spacetraders_sdk::apis::agents_api::get_my_agent;
 use spacetraders_sdk::apis::configuration::Configuration;
-use spacetraders_sdk::apis::contracts_api::{accept_contract, get_contracts, AcceptContractParams, GetContractsParams, get_contract, GetContractParams, deliver_contract, DeliverContractParams};
+use spacetraders_sdk::apis::contracts_api::{accept_contract, get_contracts, AcceptContractParams, GetContractsParams, get_contract, GetContractParams, deliver_contract, DeliverContractParams, fulfill_contract, FulfillContractParams};
 use spacetraders_sdk::apis::factions_api::{get_faction, GetFactionParams};
 use spacetraders_sdk::apis::fleet_api::{dock_ship, DockShipParams, extract_resources, ExtractResourcesParams, get_my_ship, get_my_ships, GetMyShipParams, GetMyShipsParams, navigate_ship, NavigateShipParams, orbit_ship, OrbitShipParams, purchase_ship, PurchaseShipParams, refuel_ship, RefuelShipParams, sell_cargo, SellCargoParams};
 use spacetraders_sdk::apis::systems_api::{get_shipyard, get_system_waypoints, get_waypoint, GetShipyardParams, GetSystemWaypointsParams, GetWaypointParams};
@@ -323,7 +324,25 @@ async fn main() -> anyhow::Result<()> {
 
                 let contract_results = get_contract(&conf, GetContractParams { contract_id: CONTRACT_ID.to_string() }).await;
                 match contract_results {
-                    Ok(cr) => info!("Updated contract results: {:?}", cr),
+                    Ok(cr) => {
+                        info!("Updated contract results: {:?}", cr);
+                        if !cr.data.fulfilled && cr.data.terms.deliver.unwrap().iter().all(|i| i.units_fulfilled == i.units_required) {
+                            let fulfill_contract_results = fulfill_contract(&conf, FulfillContractParams {
+                                contract_id: CONTRACT_ID.to_string(),
+                            });
+
+                            match fulfill_contract_results {
+                                Ok(fcr) => info!("Fulfill contract results: {:?}", fcr),
+                                Err(fcre) => {
+                                    let ei = get_error_info(fcre);
+                                    error!("Fulfill contract result error ({}): {}", ei.code, ei.message);
+                                }
+                            }
+
+                            info!("Technically this script is done since the contract is fulfilled");
+                            process::exit(0);
+                        }
+                    },
                     Err(cre) => {
                         let ei = get_error_info(cre);
                         error!("Get contract results error ({}): not waiting since this is a non-critical call: {}", ei.code, ei.message);
