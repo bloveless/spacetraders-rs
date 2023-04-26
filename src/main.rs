@@ -65,7 +65,7 @@ async fn main() -> anyhow::Result<()> {
     // info!("Register Response: {:?}", register_response);
 
     let my_agent = get_my_agent(&conf).await?;
-    info!("My agent: {:#?}", my_agent);
+    info!("My agent: {:?}", my_agent);
 
     // let my_contracts = get_contracts(
     //     &conf,
@@ -75,7 +75,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // info!("My contracts {:#?}", my_contracts);
+    // info!("My contracts {:?}", my_contracts);
 
     // let my_faction = get_faction(
     //     &conf,
@@ -84,7 +84,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // info!("My faction {:#?}", my_faction);
+    // info!("My faction {:?}", my_faction);
 
     let my_ships = get_my_ships(
         &conf,
@@ -94,7 +94,7 @@ async fn main() -> anyhow::Result<()> {
         },
     )
         .await?;
-    info!("My ships {:#?}", my_ships);
+    info!("My ships {:?}", my_ships);
 
     // let starting_waypoint = get_waypoint(
     //     &conf,
@@ -104,7 +104,7 @@ async fn main() -> anyhow::Result<()> {
     //     },
     // )
     // .await?;
-    // info!("Starting waypoint: {:#?}", starting_waypoint);
+    // info!("Starting waypoint: {:?}", starting_waypoint);
 
     // let accepted_contract = accept_contract(
     //     &conf,
@@ -115,19 +115,19 @@ async fn main() -> anyhow::Result<()> {
     // .await;
     //
     // match accepted_contract {
-    //     Ok(ac) => info!("Accepted Contract: {:#?}", ac),
+    //     Ok(ac) => info!("Accepted Contract: {:?}", ac),
     //     Err(e) => error!("Accept contract failed: {}", get_error_message(e)),
     // }
 
     let my_contract = get_contract(&conf, GetContractParams { contract_id: CONTRACT_ID.to_string() }).await?;
-    info!("My Contract: {:#?}", my_contract);
+    info!("My Contract: {:?}", my_contract);
 
     // Find a shipyard
     // let waypoints = get_system_waypoints(&conf, GetSystemWaypointsParams {
     //     system_symbol: "X1-DF55".to_string(),
     //     ..Default::default()
     // }).await?;
-    // info!("Waypoints: {:#?}", waypoints);
+    // info!("Waypoints: {:?}", waypoints);
 
     // let shipyard = waypoints.data.into_iter().find(|w| {
     //     w.traits.clone().into_iter().find(|t| t.symbol == Symbol::Shipyard).is_some()
@@ -318,6 +318,15 @@ async fn main() -> anyhow::Result<()> {
                         error!("Delivery result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
+                    }
+                }
+
+                let contract_results = get_contract(&conf, GetContractParams { contract_id: CONTRACT_ID.to_string() }).await;
+                match contract_results {
+                    Ok(cr) => info("Updated contract results: {}", cr),
+                    Err(cre) => {
+                        let ei = get_error_info(cre);
+                        error!("Get contract results error ({}): not waiting since this is a non-critical call: {}", ei.code, ei.message);
                     }
                 }
 
