@@ -20,16 +20,27 @@ const FACTION: &str = "COSMIC";
 const CONTRACT_ID: &str = "clgq3der73qs8s60dvfrf05yj";
 const BLOVE_TOKEN: &str = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiQkxPVkUiLCJpYXQiOjE2ODIwNTM3NDgsInN1YiI6ImFnZW50LXRva2VuIn0.NJcz9nRlLFkilnwRZQ4YR-LHQPFNhaqRmoYAgY1GYXuLhbux7rjVirFIj4jZlrugwn5yzLiNufXmBSQjKOmx8B5Mf0stOYuD9mYGdrZy_Gv9VsGBfX896_Jm2y33Nr35wzTGvkfDz32rnFReb1YDzI7AtbRpvlfbS7J6pLjESmR7lAwiS_4k_9LhLh2qOh5JVM1gWONzqN1z9domdICRVXxIOTaC8EwujtjOVlRJMPiCiD98hwlwar43ipQMQC1b5jOBTenZgKPpC1T6k2nMXmb0ABKl2PzTetC2m53t8qzahMOJaIYtZWBA3ljKpXM20EWUeylIj86dv4Lww4kuiARmS-AX5C6KM0iT9ER6uYK16MfUbZhtnzidH7DpAC0oHm-OZk1-SqLhX56Hf4eMEUAJRryZ_i-MoMGAE8g01W4iT1t6WrYtQlG7IkdiU0GgTPNYNDkBJwpE5bddhL2dOFiYigNaXVR6MXFUFyUlMIZZ37UWK_-R59Y1roaYA0JQ";
 
-fn get_error_message(e: Error) -> String {
+struct ErrorInfo {
+    code: u32,
+    message: String,
+}
+
+fn get_error_info(e: Error) -> ErrorInfo {
     match e {
         Error::ResponseError(re) => {
-            format!(
-                "error status: {}, error message: {}",
-                re.status,
-                re.entity.unwrap().error.message,
-            )
+            let response_content_entity = re.entity.unwrap();
+
+            ErrorInfo {
+                code: response_content_entity.error.code,
+                message: format!(
+                    "error status: {}, error code: {} error message: {}",
+                    re.status,
+                    response_content_entity.error.code,
+                    response_content_entity.error.message,
+                ),
+            }
         }
-        _ => format!("unknown error"),
+        _ => ErrorInfo { code: 0, message: format!("unknown error") },
     }
 }
 
@@ -210,7 +221,8 @@ async fn main() -> anyhow::Result<()> {
                 match dock_result {
                     Ok(dr) => info!("Dock result: {:?}", dr),
                     Err(dre) => {
-                        error!("Dock result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        let ei = get_error_info(dre);
+                        error!("Dock result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -224,7 +236,8 @@ async fn main() -> anyhow::Result<()> {
                 match refueling_result {
                     Ok(rr) => info!("Refueling result: {:?}", rr),
                     Err(rre) => {
-                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        let ei = get_error_info(rre);
+                        error!("Refueling result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -249,9 +262,13 @@ async fn main() -> anyhow::Result<()> {
                         tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
                     }
                     Err(nre) => {
-                        error!("Navigation results error, waiting 10 seconds and starting loop again: {:?}", get_error_message(nre));
-                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-                        continue 'main;
+                        let ei = get_error_info(nre);
+                        // We can skip any 4204 errors since that just means we are already at the destination
+                        if ei.code != 4204 {
+                            error!("Navigation results error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                            continue 'main;
+                        }
                     }
                 };
 
@@ -261,7 +278,8 @@ async fn main() -> anyhow::Result<()> {
                 match dock_result {
                     Ok(dr) => info!("Dock result: {:?}", dr),
                     Err(dre) => {
-                        error!("Dock result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        let ei = get_error_info(dre);
+                        error!("Dock result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -275,7 +293,8 @@ async fn main() -> anyhow::Result<()> {
                 match refueling_result {
                     Ok(rr) => info!("Refueling result: {:?}", rr),
                     Err(rre) => {
-                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        let ei = get_error_info(rre);
+                        error!("Refueling result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -295,7 +314,8 @@ async fn main() -> anyhow::Result<()> {
                 match delivery_result {
                     Ok(dr) => info!("Delivery result: {:?}", dr),
                     Err(dre) => {
-                        error!("Delivery result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        let ei = get_error_info(dre);
+                        error!("Delivery result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -308,7 +328,8 @@ async fn main() -> anyhow::Result<()> {
                 match orbit_result {
                     Ok(or) => info!("Orbit result: {:?}", or),
                     Err(ore) => {
-                        error!("Orbit result error, waiting 10 seconds and starting loop again: {:?}", ore);
+                        let ei = get_error_info(ore);
+                        error!("Orbit result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -316,29 +337,32 @@ async fn main() -> anyhow::Result<()> {
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
                 info!("Returning to asteroid field");
-                let nav_results = navigate_ship(&conf, NavigateShipParams {
+                let navigation_results = navigate_ship(&conf, NavigateShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                     navigate_ship_request: Some(NavigateShipRequest {
                         waypoint_symbol: asteroid_field_waypoint_symbol.to_string(),
                     }),
                 }).await;
-                let nav_results = match nav_results {
+                match navigation_results {
                     Ok(nr) => {
                         info!("Navigation results: {:?}", nr);
-                        nr
-                    },
+
+                        let arrival = DateTime::parse_from_rfc3339(&nr.data.nav.route.arrival).unwrap();
+                        let arrival_seconds = arrival.signed_duration_since(Local::now());
+                        info!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
+                        tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
+                    }
                     Err(nre) => {
-                        error!("Nav results error, waiting 10 seconds and starting loop again: {:?}", nre);
-                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-                        continue 'main;
+                        let ei = get_error_info(nre);
+                        // We can skip any 4204 errors since that just means we are already at the destination
+                        if ei.code != 4204 {
+                            error!("Navigation results error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                            continue 'main;
+                        }
                     }
                 };
-                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-                let arrival = DateTime::parse_from_rfc3339(&nav_results.data.nav.route.arrival).unwrap();
-                let arrival_seconds = arrival.signed_duration_since(Local::now());
-                info!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
-                tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
 
                 info!("Docking ship to refuel");
                 let docking_result = dock_ship(&conf, DockShipParams {
@@ -347,7 +371,8 @@ async fn main() -> anyhow::Result<()> {
                 match docking_result {
                     Ok(dr) => info!("Docking Result: {:?}", dr),
                     Err(dre) => {
-                        error!("Docking results error, waiting 10 seconds and starting loop again: {:?}", dre);
+                        let ei = get_error_info(dre);
+                        error!("Docking results error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -361,7 +386,8 @@ async fn main() -> anyhow::Result<()> {
                 match refueling_result {
                     Ok(rr) => info!("Refueling result: {:?}", rr),
                     Err(rre) => {
-                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        let ei = get_error_info(rre);
+                        error!("Refueling result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -375,7 +401,8 @@ async fn main() -> anyhow::Result<()> {
                 match orbit_result {
                     Ok(or) => info!("Orbit result: {:?}", or),
                     Err(ore) => {
-                        error!("Orbit result error, waiting 10 seconds and starting loop again: {:?}", ore);
+                        let ei = get_error_info(ore);
+                        error!("Orbit result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                         tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
                         continue 'main;
                     }
@@ -404,7 +431,12 @@ async fn main() -> anyhow::Result<()> {
                     }).await;
                     match sell_results {
                         Ok(sr) => info!("Sell results: {:?}", sr),
-                        Err(sre) => error!("Sell results error: {:?}", sre),
+                        Err(sre) => {
+                            let ei = get_error_info(sre);
+                            error!("Sell results error({}): waiting for 10 seconds and restarting loop {}", ei.code, ei.message);
+                            tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                            continue 'main;
+                        }
                     }
                     tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 }
@@ -413,8 +445,16 @@ async fn main() -> anyhow::Result<()> {
             info!("Going into orbit");
             let orbit_results = orbit_ship(&conf, OrbitShipParams {
                 ship_symbol: mining_ship_symbol.to_string(),
-            }).await?;
-            info!("Orbit results: {:?}", orbit_results);
+            }).await;
+            match orbit_results {
+                Ok(or) => info!("Orbit results: {:?}", or),
+                Err(ore) => {
+                    let ei = get_error_info(ore);
+                    error!("Orbit result error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
+                    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                    continue 'main;
+                }
+            }
             tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
         }
 
@@ -430,9 +470,11 @@ async fn main() -> anyhow::Result<()> {
                 tokio::time::sleep(tokio::time::Duration::from_secs(er.data.cooldown.remaining_seconds as u64)).await;
                 info!("Cool down over");
             }
-            Err(e) => {
-                error!("Extract error (waiting 10 seconds and retrying): {:?}", get_error_message(e));
+            Err(ere) => {
+                let ei = get_error_info(ere);
+                error!("Extract results error ({}), waiting 10 seconds and starting loop again: {}", ei.code, ei.message);
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                continue 'main;
             }
         }
     }
