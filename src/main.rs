@@ -323,7 +323,7 @@ async fn main() -> anyhow::Result<()> {
 
                 let contract_results = get_contract(&conf, GetContractParams { contract_id: CONTRACT_ID.to_string() }).await;
                 match contract_results {
-                    Ok(cr) => info("Updated contract results: {}", cr),
+                    Ok(cr) => info!("Updated contract results: {:?}", cr),
                     Err(cre) => {
                         let ei = get_error_info(cre);
                         error!("Get contract results error ({}): not waiting since this is a non-critical call: {}", ei.code, ei.message);
