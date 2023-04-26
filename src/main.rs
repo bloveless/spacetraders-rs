@@ -28,7 +28,7 @@ fn get_error_message(e: Error) -> String {
                 re.status,
                 re.entity.unwrap().error.message,
             )
-        },
+        }
         _ => format!("unknown error"),
     }
 }
@@ -82,7 +82,7 @@ async fn main() -> anyhow::Result<()> {
             limit: None,
         },
     )
-    .await?;
+        .await?;
     info!("My ships {:#?}", my_ships);
 
     // let starting_waypoint = get_waypoint(
@@ -179,10 +179,19 @@ async fn main() -> anyhow::Result<()> {
     // }).await?;
     // info!("Orbit results: {:?}", orbit_results);
 
-    loop {
-        let ship = get_my_ship(&conf, GetMyShipParams {
+    'main: loop {
+        let ship_result = get_my_ship(&conf, GetMyShipParams {
             ship_symbol: mining_ship_symbol.to_string(),
-        }).await?;
+        }).await;
+        let ship = match ship_result {
+            Ok(sr) => sr,
+            Err(sre) => {
+                error!("Error getting ship. Waiting for 10 seconds and trying again: {:?}", sre);
+                tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                continue;
+            }
+        };
+
         tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
         info!("Current ship capacity is {} and current cargo units is {}", ship.data.cargo.capacity, ship.data.cargo.units);
@@ -192,8 +201,35 @@ async fn main() -> anyhow::Result<()> {
             if &i.symbol == "ALUMINUM_ORE" && i.units >= (ship.data.cargo.capacity - 10) {
                 info!("Ship is full of {}", i.symbol);
 
-                let deliver_goods= my_contract.data.terms.deliver.clone().unwrap();
+                let deliver_goods = my_contract.data.terms.deliver.clone().unwrap();
                 let deliver_good = deliver_goods.get(0).unwrap().clone();
+
+                let dock_result = dock_ship(&conf, DockShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                match dock_result {
+                    Ok(dr) => info!("Dock result: {:?}", dr),
+                    Err(dre) => {
+                        error!("Dock result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+                info!("Refueling");
+                let refueling_result = refuel_ship(&conf, RefuelShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                match refueling_result {
+                    Ok(rr) => info!("Refueling result: {:?}", rr),
+                    Err(rre) => {
+                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
                 let delivery_waypoint_symbol = deliver_good.destination_symbol;
                 info!("Navigating to delivery waypoint {}", delivery_waypoint_symbol);
@@ -201,7 +237,7 @@ async fn main() -> anyhow::Result<()> {
                     ship_symbol: mining_ship_symbol.to_string(),
                     navigate_ship_request: Some(NavigateShipRequest {
                         waypoint_symbol: delivery_waypoint_symbol.to_string()
-                    })
+                    }),
                 }).await;
                 match navigation_results {
                     Ok(nr) => {
@@ -211,8 +247,12 @@ async fn main() -> anyhow::Result<()> {
                         let arrival_seconds = arrival.signed_duration_since(Local::now());
                         info!("Awaiting arrival of ship ({} seconds)", arrival_seconds.num_seconds());
                         tokio::time::sleep(tokio::time::Duration::from_secs(arrival_seconds.num_seconds() as u64)).await;
-                    },
-                    Err(nre) => error!("Navigation results error: {:?}", get_error_message(nre)),
+                    }
+                    Err(nre) => {
+                        error!("Navigation results error, waiting 10 seconds and starting loop again: {:?}", get_error_message(nre));
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
                 };
 
                 let dock_result = dock_ship(&conf, DockShipParams {
@@ -220,8 +260,27 @@ async fn main() -> anyhow::Result<()> {
                 }).await;
                 match dock_result {
                     Ok(dr) => info!("Dock result: {:?}", dr),
-                    Err(dre) => error!("Dock result error: {:?}", get_error_message(dre)),
+                    Err(dre) => {
+                        error!("Dock result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
                 }
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+                info!("Refueling");
+                let refueling_result = refuel_ship(&conf, RefuelShipParams {
+                    ship_symbol: mining_ship_symbol.to_string(),
+                }).await;
+                match refueling_result {
+                    Ok(rr) => info!("Refueling result: {:?}", rr),
+                    Err(rre) => {
+                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
+                tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
                 info!("Delivering {} of {} to {}", i.units, i.symbol, delivery_waypoint_symbol);
                 let delivery_result = deliver_contract(&conf, DeliverContractParams {
@@ -230,20 +289,31 @@ async fn main() -> anyhow::Result<()> {
                         ship_symbol: mining_ship_symbol.to_string(),
                         trade_symbol: i.symbol,
                         units: i.units,
-                    })
+                    }),
                 }).await;
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
                 match delivery_result {
                     Ok(dr) => info!("Delivery result: {:?}", dr),
-                    Err(dre) => error!("Delivery result error: {:?}", get_error_message(dre)),
+                    Err(dre) => {
+                        error!("Delivery result error, waiting 10 seconds and starting loop again: {:?}", get_error_message(dre));
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
                 }
 
                 info!("Going back into orbit");
                 let orbit_result = orbit_ship(&conf, OrbitShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
+                match orbit_result {
+                    Ok(or) => info!("Orbit result: {:?}", or),
+                    Err(ore) => {
+                        error!("Orbit result error, waiting 10 seconds and starting loop again: {:?}", ore);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                info!("Orbit result: {:?}", orbit_result);
 
                 info!("Returning to asteroid field");
                 let nav_results = navigate_ship(&conf, NavigateShipParams {
@@ -251,9 +321,19 @@ async fn main() -> anyhow::Result<()> {
                     navigate_ship_request: Some(NavigateShipRequest {
                         waypoint_symbol: asteroid_field_waypoint_symbol.to_string(),
                     }),
-                }).await?;
+                }).await;
+                let nav_results = match nav_results {
+                    Ok(nr) => {
+                        info!("Navigation results: {:?}", nr);
+                        nr
+                    },
+                    Err(nre) => {
+                        error!("Nav results error, waiting 10 seconds and starting loop again: {:?}", nre);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                };
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                info!("Navigation results: {:?}", nav_results);
 
                 let arrival = DateTime::parse_from_rfc3339(&nav_results.data.nav.route.arrival).unwrap();
                 let arrival_seconds = arrival.signed_duration_since(Local::now());
@@ -264,22 +344,43 @@ async fn main() -> anyhow::Result<()> {
                 let docking_result = dock_ship(&conf, DockShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
+                match docking_result {
+                    Ok(dr) => info!("Docking Result: {:?}", dr),
+                    Err(dre) => {
+                        error!("Docking results error, waiting 10 seconds and starting loop again: {:?}", dre);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                info!("Docking Result: {:?}", docking_result);
 
                 info!("Refueling");
                 let refueling_result = refuel_ship(&conf, RefuelShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
+                match refueling_result {
+                    Ok(rr) => info!("Refueling result: {:?}", rr),
+                    Err(rre) => {
+                        error!("Refueling result error, waiting 10 seconds and starting loop again: {:?}", rre);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                info!("Refueling result: {:?}", refueling_result);
 
                 info!("Going back into orbit");
                 let orbit_result = orbit_ship(&conf, OrbitShipParams {
                     ship_symbol: mining_ship_symbol.to_string(),
                 }).await;
+                match orbit_result {
+                    Ok(or) => info!("Orbit result: {:?}", or),
+                    Err(ore) => {
+                        error!("Orbit result error, waiting 10 seconds and starting loop again: {:?}", ore);
+                        tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+                        continue 'main;
+                    }
+                }
                 tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
-                info!("Orbit result: {:?}", orbit_result);
             }
         }
 
@@ -328,11 +429,11 @@ async fn main() -> anyhow::Result<()> {
                 info!("Cooling down for {} seconds", er.data.cooldown.remaining_seconds);
                 tokio::time::sleep(tokio::time::Duration::from_secs(er.data.cooldown.remaining_seconds as u64)).await;
                 info!("Cool down over");
-            },
+            }
             Err(e) => {
                 error!("Extract error (waiting 10 seconds and retrying): {:?}", get_error_message(e));
                 tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
-            },
+            }
         }
     }
 }
