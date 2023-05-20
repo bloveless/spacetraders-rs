@@ -36,7 +36,7 @@ use spacetraders_sdk::models::{
 use std::{env, process};
 
 const BASE_URL: &str = "https://api.spacetraders.io";
-const ACCOUNT_SYMBOL: &str = "BLOVE";
+const ACCOUNT_SYMBOL: &str = "BLOVE-AGAIN";
 // const FACTION: &str = "COSMIC";
 // const CONTRACT_ID: &str = "clgq3der73qs8s60dvfrf05yj";
 
@@ -96,7 +96,7 @@ async fn main() -> anyhow::Result<()> {
     //     &conf,
     //     RegisterParams {
     //         register_request: Some(RegisterRequest {
-    //             symbol: "blove".to_string(),
+    //             symbol: ACCOUNT_SYMBOL.to_string(),
     //             faction: Faction::Cosmic,
     //         }),
     //     },
