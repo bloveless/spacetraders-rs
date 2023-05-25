@@ -31,6 +31,7 @@
             rust
             nodejs
             openapi-generator-cli
+            rust-analyzer
           ] ++ (
             lib.optionals stdenv.isDarwin [
               frameworks.Security
